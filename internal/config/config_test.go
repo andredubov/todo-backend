@@ -51,7 +51,7 @@ func TestMain(t *testing.T) {
 		{
 			name: "test config",
 			args: args{
-				path: "./configs",
+				path: "../../configs",
 				env: env{
 					appEnv:               "local",
 					httpHost:             "localhost",

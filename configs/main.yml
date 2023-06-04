@@ -9,8 +9,8 @@ postgres:
   port: 5432
   username: postgres
   password: qwerty
-	databasename:  postgres
-	sslmode: none
+  databasename:  postgres
+  sslmode: none
 
 cache:
   ttl: 3600s
