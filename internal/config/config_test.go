@@ -60,7 +60,7 @@ func TestMain(t *testing.T) {
 					postgresDatabaseName: "postgres",
 					postgresUsername:     "postgres",
 					postgresPassword:     "qwerty",
-					postgressSSLMode:     "false",
+					postgressSSLMode:     "disable",
 					passwordSalt:         "salt",
 					jwtSigningKey:        "key",
 				},
@@ -74,7 +74,7 @@ func TestMain(t *testing.T) {
 					Username:     "postgres",
 					Password:     "qwerty",
 					DatabaseName: "postgres",
-					SSLMode:      "false",
+					SSLMode:      "disable",
 				},
 				HTTP: config.HTTPConfig{
 					Host:               "localhost",

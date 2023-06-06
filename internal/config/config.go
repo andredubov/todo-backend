@@ -15,6 +15,7 @@ const (
 	defaultAccessTokenTTL         = 15 * time.Minute
 	defaultRefreshTokenTTL        = 24 * time.Hour * 30
 	defaultVerificationCodeLength = 8
+	defaultSSLMode                = "disable"
 
 	Local = "local"
 	Prod  = "prod"
@@ -164,4 +165,5 @@ func populateDefaults() {
 	viper.SetDefault("auth.accessTokenTTL", defaultAccessTokenTTL)
 	viper.SetDefault("auth.refreshTokenTTL", defaultRefreshTokenTTL)
 	viper.SetDefault("auth.verificationCodeLength", defaultVerificationCodeLength)
+	viper.SetDefault("postgres.sslmode", defaultSSLMode)
 }
