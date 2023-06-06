@@ -113,12 +113,3 @@ func TestMain(t *testing.T) {
 		})
 	}
 }
-
-// got  {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 0} {localhost 8080 10s 10s 0} 1h0m0s}
-// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
-
-// got  {local {localhost 5432 postgres qwerty postgres false} {{0s 0s key} salt 10} {localhost 8080 10s 10s 0} 1h0m0s}
-// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
-
-// got  {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 0} 1h0m0s}
-// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
