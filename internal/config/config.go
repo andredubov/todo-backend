@@ -18,6 +18,17 @@ const (
 
 	Local = "local"
 	Prod  = "prod"
+
+	PostgresHost           = "POSTGRES_HOST"
+	PostgresPort           = "POSTGRES_PORT"
+	PostgresDatabaseName   = "POSTGRES_DB_NAME"
+	PostgresUsername       = "POSTGRES_USERNAME"
+	PostgresPassword       = "POSTGRES_PASSWORD"
+	PostgresSSLMode        = "POSTGRES_SSL_MODE"
+	PasswordSalt           = "PASSWORD_SALT"
+	JwtSigningKey          = "JWT_SIGNING_KEY"
+	HttpHost               = "HTTP_HOST"
+	ApplicationEnvironment = "APP_ENV"
 )
 
 type (
@@ -55,7 +66,7 @@ type (
 		Port               string        `mapstructure:"port"`
 		ReadTimeout        time.Duration `mapstructure:"readTimeout"`
 		WriteTimeout       time.Duration `mapstructure:"writeTimeout"`
-		MaxHeaderMegabytes int           `mapstructure:"maxHeaderBytes"`
+		MaxHeaderMegabytes int           `mapstructure:"maxHeaderMegaBytes"`
 	}
 )
 
@@ -67,7 +78,7 @@ func Init(configsDir string) (Config, error) {
 
 	var cfg Config
 
-	if err := parseConfigFile(configsDir, os.Getenv("APP_ENV")); err != nil {
+	if err := parseConfigFile(configsDir, os.Getenv(ApplicationEnvironment)); err != nil {
 		return cfg, err
 	}
 
@@ -96,6 +107,10 @@ func unmarshal(cfg *Config) error {
 		return err
 	}
 
+	if err := viper.UnmarshalKey("auth.verificationCodeLength", &cfg.Auth.VerificationCodeLength); err != nil {
+		return err
+	}
+
 	if err := viper.UnmarshalKey("postgres", &cfg.Postgres); err != nil {
 		return err
 	}
@@ -105,21 +120,20 @@ func unmarshal(cfg *Config) error {
 
 func setFromEnv(cfg *Config) error {
 
-	cfg.Postgres.Host = os.Getenv("POSTGRES_HOST")
-	port, err := strconv.Atoi(os.Getenv("POSTGRESS_PORT"))
+	cfg.Postgres.Host = os.Getenv(PostgresHost)
+	port, err := strconv.Atoi(os.Getenv(PostgresPort))
 	if err != nil {
 		return err
 	}
 	cfg.Postgres.Port = port
-	cfg.Postgres.DatabaseName = os.Getenv("POSTGRESS_DB_NAME")
-	cfg.Postgres.Username = os.Getenv("POSTGRES_USERNAME")
-	cfg.Postgres.Password = os.Getenv("POSTGRES_PASSWORD")
-	cfg.Postgres.SSLMode = os.Getenv("POSTGRES_SSL_MODE")
-
-	cfg.Auth.PasswordSalt = os.Getenv("PASSWORD_SALT")
-	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
-	cfg.HTTP.Host = os.Getenv("HTTP_HOST")
-	cfg.Environment = os.Getenv("APP_ENV")
+	cfg.Postgres.DatabaseName = os.Getenv(PostgresDatabaseName)
+	cfg.Postgres.Username = os.Getenv(PostgresUsername)
+	cfg.Postgres.Password = os.Getenv(PostgresPassword)
+	cfg.Postgres.SSLMode = os.Getenv(PostgresSSLMode)
+	cfg.Auth.PasswordSalt = os.Getenv(PasswordSalt)
+	cfg.Auth.JWT.SigningKey = os.Getenv(JwtSigningKey)
+	cfg.HTTP.Host = os.Getenv(HttpHost)
+	cfg.Environment = os.Getenv(ApplicationEnvironment)
 
 	return nil
 }

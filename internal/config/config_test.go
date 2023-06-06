@@ -30,16 +30,16 @@ func TestMain(t *testing.T) {
 	}
 
 	setEnv := func(env env) {
-		os.Setenv("APP_ENV", env.appEnv)
-		os.Setenv("HTTP_HOST", env.httpHost)
-		os.Setenv("POSTGRES_HOST", env.postgresHost)
-		os.Setenv("POSTGRESS_PORT", env.postgresPort)
-		os.Setenv("POSTGRESS_DB_NAME", env.postgresDatabaseName)
-		os.Setenv("POSTGRES_USER", env.postgresUsername)
-		os.Setenv("POSTGRES_PASSWORD", env.postgresPassword)
-		os.Setenv("POSTGRES_SSL_MODE", env.postgressSSLMode)
-		os.Setenv("PASSWORD_SALT", env.passwordSalt)
-		os.Setenv("JWT_SIGNING_KEY", env.jwtSigningKey)
+		os.Setenv(config.ApplicationEnvironment, env.appEnv)
+		os.Setenv(config.HttpHost, env.httpHost)
+		os.Setenv(config.PostgresHost, env.postgresHost)
+		os.Setenv(config.PostgresPort, env.postgresPort)
+		os.Setenv(config.PostgresDatabaseName, env.postgresDatabaseName)
+		os.Setenv(config.PostgresUsername, env.postgresUsername)
+		os.Setenv(config.PostgresPassword, env.postgresPassword)
+		os.Setenv(config.PostgresSSLMode, env.postgressSSLMode)
+		os.Setenv(config.PasswordSalt, env.passwordSalt)
+		os.Setenv(config.JwtSigningKey, env.jwtSigningKey)
 	}
 
 	tests := []struct {
@@ -74,7 +74,7 @@ func TestMain(t *testing.T) {
 					Username:     "postgres",
 					Password:     "qwerty",
 					DatabaseName: "postgres",
-					SSLMode:      "none",
+					SSLMode:      "false",
 				},
 				HTTP: config.HTTPConfig{
 					Host:               "localhost",
@@ -113,3 +113,12 @@ func TestMain(t *testing.T) {
 		})
 	}
 }
+
+// got  {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 0} {localhost 8080 10s 10s 0} 1h0m0s}
+// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
+
+// got  {local {localhost 5432 postgres qwerty postgres false} {{0s 0s key} salt 10} {localhost 8080 10s 10s 0} 1h0m0s}
+// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
+
+// got  {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 0} 1h0m0s}
+// want {local {localhost 5432 postgres qwerty postgres false} {{15m0s 30m0s key} salt 10} {localhost 8080 10s 10s 1} 1h0m0s}
