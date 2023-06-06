@@ -20,15 +20,16 @@ const (
 	Local = "local"
 	Prod  = "prod"
 
-	PostgresHost           = "POSTGRES_HOST"
-	PostgresPort           = "POSTGRES_PORT"
-	PostgresDatabaseName   = "POSTGRES_DB_NAME"
-	PostgresUsername       = "POSTGRES_USERNAME"
-	PostgresPassword       = "POSTGRES_PASSWORD"
-	PostgresSSLMode        = "POSTGRES_SSL_MODE"
+	PostgresHost           = "DB_HOST"
+	PostgresPort           = "DB_PORT"
+	PostgresDatabaseName   = "DB_NAME"
+	PostgresUsername       = "DB_USER"
+	PostgresPassword       = "DB_PASSWORD"
+	PostgresSSLMode        = "DB_SSL_MODE"
 	PasswordSalt           = "PASSWORD_SALT"
 	JwtSigningKey          = "JWT_SIGNING_KEY"
 	HttpHost               = "HTTP_HOST"
+	HttpPort               = "HTTP_PORT"
 	ApplicationEnvironment = "APP_ENV"
 )
 
@@ -134,6 +135,7 @@ func setFromEnv(cfg *Config) error {
 	cfg.Auth.PasswordSalt = os.Getenv(PasswordSalt)
 	cfg.Auth.JWT.SigningKey = os.Getenv(JwtSigningKey)
 	cfg.HTTP.Host = os.Getenv(HttpHost)
+	cfg.HTTP.Port = os.Getenv(HttpPort)
 	cfg.Environment = os.Getenv(ApplicationEnvironment)
 
 	return nil

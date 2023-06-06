@@ -14,6 +14,7 @@ func TestMain(t *testing.T) {
 	type env struct {
 		appEnv               string
 		httpHost             string
+		httpPort             string
 		postgresHost         string
 		postgresPort         string
 		postgresDatabaseName string
@@ -32,6 +33,7 @@ func TestMain(t *testing.T) {
 	setEnv := func(env env) {
 		os.Setenv(config.ApplicationEnvironment, env.appEnv)
 		os.Setenv(config.HttpHost, env.httpHost)
+		os.Setenv(config.HttpPort, env.httpPort)
 		os.Setenv(config.PostgresHost, env.postgresHost)
 		os.Setenv(config.PostgresPort, env.postgresPort)
 		os.Setenv(config.PostgresDatabaseName, env.postgresDatabaseName)
@@ -55,6 +57,7 @@ func TestMain(t *testing.T) {
 				env: env{
 					appEnv:               "local",
 					httpHost:             "localhost",
+					httpPort:             "8080",
 					postgresHost:         "localhost",
 					postgresPort:         "5432",
 					postgresDatabaseName: "postgres",
