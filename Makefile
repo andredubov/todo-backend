@@ -18,8 +18,7 @@ run: clear
 stop:
 	docker-compose down
 
-clear: stop
-
+clear:
 ifneq ($(strip $(IS_TODO_BACKEND_RUNNING)),)
 	docker stop $(IS_TODO_BACKEND_RUNNING)
 endif
