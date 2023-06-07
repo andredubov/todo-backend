@@ -2,9 +2,9 @@ version: '3.9'
 
 services:
 
-  todobackend:
-    image: todobackend
-    container_name: todobackend
+  restapi:
+    image: todo_backend
+    container_name: todo_backend
     restart: unless-stopped
     build:
       context: .
@@ -20,29 +20,25 @@ services:
       - todoNet
 
   postgres:
-    image: postgres:15.3
+    image: postgres:15.3-alpine3.18
     container_name: postgres
     restart: unless-stopped
     ports:
-      - ${POSTGRESS_PORT}:${POSTGRESS_PORT}"
+      - ${DB_PORT}:${DB_PORT}
     env_file:
       - .env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./schema:/docker-entrypoint-initdb.d
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRESS_DB_NAME}"
-        ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 60
+      start_period: 60s
     networks:
       - todoNet
 

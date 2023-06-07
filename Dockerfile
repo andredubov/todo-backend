@@ -13,9 +13,6 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root
 
 COPY --from=builder /github.com/andredubov/todo-backend/.bin/app .
-ADD configs ./configs
-
-ARG TAG
-ENV TAG ${TAG}
+COPY --from=builder /github.com/andredubov/todo-backend/configs ./configs
 
 CMD [ "./app"]
