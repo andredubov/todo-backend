@@ -34,9 +34,13 @@ services:
     volumes:
       - ./schema:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -q -U ${DB_USER} -d ${DB_NAME}"
+        ]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 60
       start_period: 60s
     networks:
