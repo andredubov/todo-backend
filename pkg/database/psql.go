@@ -5,6 +5,7 @@ import (
 
 	"github.com/andredubov/todo-backend/internal/config"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 func NewPostgresConnection(cfg config.Config) (*sqlx.DB, error) {
