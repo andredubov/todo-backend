@@ -2,9 +2,9 @@
 .SILENT:
 .DEFAULT_GOAL := run
 
-IS_LETS_GO_AGGREGATOR_RUNNING := $(shell docker ps --filter name=todo_backend --filter status=running -aq)
-IS_LETS_GO_AGGREGATOR_EXITED := $(shell docker ps --filter name=todo_backend -aq)
-IS_LETS_GO_AGGREGATOR := $(shell docker images --filter=reference="*/todo_backend" -aq)
+IS_TODO_BACKEND_RUNNING := $(shell docker ps --filter name=todo_backend --filter status=running -aq)
+IS_TODO_BACKEND_EXITED := $(shell docker ps --filter name=todo_backend -aq)
+IS_TODO_BACKEND := $(shell docker images --filter=reference="*/todo_backend" -aq)
 
 build:
 	go mod download && CGO_ENABLED=0 GOOS=linux go build -o ./.bin/app ./cmd/app/main.go
