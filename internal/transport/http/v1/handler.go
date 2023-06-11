@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/andredubov/todo-backend/internal/config"
 	"github.com/andredubov/todo-backend/internal/service"
@@ -16,14 +18,18 @@ type Handler struct {
 	tokenManager   auth.TokenManager
 	passwordHasher hash.PasswordHasher
 	memoryCache    cache.Cache
+	jwtConfig      config.JWTConfig
+	cacheTTL       time.Duration
 }
 
-func NewHandler(services *service.Service, tokenManager auth.TokenManager, passwordHasher hash.PasswordHasher, memoryCache cache.Cache) *Handler {
+func NewHandler(services *service.Service, tokenManager auth.TokenManager, passwordHasher hash.PasswordHasher, memoryCache cache.Cache, jwtConfig config.JWTConfig, cacheTTL time.Duration) *Handler {
 	return &Handler{
 		tokenManager:   tokenManager,
 		services:       services,
 		passwordHasher: passwordHasher,
 		memoryCache:    memoryCache,
+		jwtConfig:      jwtConfig,
+		cacheTTL:       cacheTTL,
 	}
 }
 
@@ -52,4 +58,10 @@ func (h *Handler) InitRoutes(cfg config.Config) http.Handler {
 	deleteRouter.HandleFunc("/api/items/{id:[0-9]+}", h.deleteItemByID)
 
 	return router
+}
+
+func (h *Handler) writeResponseWithError(w http.ResponseWriter, statusCode int, err error) {
+	w.WriteHeader(statusCode)
+	message := fmt.Sprintf(`{"error": "%s"}`, err.Error())
+	w.Write([]byte(message))
 }
