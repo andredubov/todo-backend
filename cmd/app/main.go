@@ -49,7 +49,7 @@ func main() {
 	memcache, hasher := cache.NewMemoryCache(), hash.NewSHA1Hasher(cfg.Auth.PasswordSalt)
 	respository := repository.New(db)
 	services := service.New(respository)
-	handler := transport.NewHandler(services, tokenManager, hasher, memcache).InitRoutes(cfg)
+	handler := transport.NewHandler(services, tokenManager, hasher, memcache, cfg.Auth.JWT, cfg.CacheTTL).InitRoutes(cfg)
 
 	srv := server.New(cfg, handler)
 

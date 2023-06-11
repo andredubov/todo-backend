@@ -12,13 +12,13 @@ IS_TODO_DATABASE_EXITED := $(shell docker ps --filter name=todo_database -aq)
 build:
 	go mod download && CGO_ENABLED=0 GOOS=linux go build -o ./.bin/app ./cmd/app/main.go
 
-run: clear
+run: clean
 	docker-compose up --build --detach
 
 stop:
 	docker-compose down
 
-clear:
+clean:
 ifneq ($(strip $(IS_TODO_BACKEND_RUNNING)),)
 	docker stop $(IS_TODO_BACKEND_RUNNING)
 endif
