@@ -39,7 +39,7 @@ func (h *Handler) InitRoutes(cfg config.Config) http.Handler {
 
 	router := mux.NewRouter()
 
-	router.PathPrefix("/swagger/*").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	getRouter := router.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/api/lists", h.getLists)
