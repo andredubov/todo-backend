@@ -11,6 +11,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+// @Summary Create todo item
+// @Security ApiKeyAuth
+// @Tags items
+// @Description create todo item
+// @ID create-item
+// @Accept  json
+// @Produce  json
+// @Param input body domain.TodoItem true "list info"
+// @Success 200 {object} domain.TodoItem
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists [post]
 func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -50,6 +63,18 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get All Items
+// @Security ApiKeyAuth
+// @Tags items
+// @Description get all todo-items
+// @ID get-all-items
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} GetTodoItemResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists/:id/items [get]
 func (h *Handler) getItems(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
@@ -77,6 +102,18 @@ func (h *Handler) getItems(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get todo-item By Id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description get todo-item by id
+// @ID get-item-by-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} domain.TodoItem
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/items/:id [get]
 func (h *Handler) getItemByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
@@ -104,6 +141,19 @@ func (h *Handler) getItemByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Update todo-item by Id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description update todo-item by id
+// @ID update-item-by-id
+// @Accept  json
+// @Produce  json
+// @Param input body domain.TodoItem true "item info"
+// @Success 200 {object} StatusResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/items/:id [put]
 func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
@@ -136,6 +186,18 @@ func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Delete todo-item by Id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description delete todo-item by id
+// @ID delete-item-by-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} StatusResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/items/:id [delete]
 func (h *Handler) deleteItemByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)

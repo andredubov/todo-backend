@@ -15,6 +15,18 @@ const (
 	timeout = 5 * time.Second
 )
 
+// @Summary SignUp
+// @Tags auth
+// @Description create account
+// @ID create-account
+// @Accept  json
+// @Produce  json
+// @Param input body domain.User true "account info"
+// @Success 200 {object} domain.User
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	var user domain.User
@@ -53,6 +65,18 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description login
+// @ID login
+// @Accept  json
+// @Produce  json
+// @Param input body domain.User true "credentials"
+// @Success 200 {object} SignInResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /auth/sign-in [post]
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	var user domain.User

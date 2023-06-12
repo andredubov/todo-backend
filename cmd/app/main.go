@@ -26,6 +26,15 @@ const (
 	timeout    = 5 * time.Second
 )
 
+// @title Todo App API
+// @version 1.0
+// @description API Server for TodoList Application
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 
 	cfg, err := config.Init(configPath)

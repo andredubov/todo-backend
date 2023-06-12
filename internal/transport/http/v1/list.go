@@ -11,6 +11,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+// @Summary Create todo list
+// @Security ApiKeyAuth
+// @Tags lists
+// @Description create todo list
+// @ID create-list
+// @Accept  json
+// @Produce  json
+// @Param input body domain.TodoList true "list info"
+// @Success 200 {object} domain.TodoList
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists [post]
 func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 
 	userId := h.getUserId(w, r)
@@ -45,6 +58,18 @@ func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get All Lists
+// @Security ApiKeyAuth
+// @Tags lists
+// @Description get all todo-lists
+// @ID get-all-lists
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} GetTodoListsResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists [get]
 func (h *Handler) getLists(w http.ResponseWriter, r *http.Request) {
 
 	userId := h.getUserId(w, r)
@@ -66,6 +91,18 @@ func (h *Handler) getLists(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get List By Id
+// @Security ApiKeyAuth
+// @Tags lists
+// @Description get todo-list by id
+// @ID get-list-by-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} domain.TodoList
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists/:id [get]
 func (h *Handler) getListByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
@@ -93,6 +130,19 @@ func (h *Handler) getListByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Update todo-list by Id
+// @Security ApiKeyAuth
+// @Tags lists
+// @Description update todo-list by id
+// @ID update-list-by-id
+// @Accept  json
+// @Produce  json
+// @Param input body domain.TodoList true "item info"
+// @Success 200 {object} StatusResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists/:id [put]
 func (h *Handler) updateListByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
@@ -125,6 +175,18 @@ func (h *Handler) updateListByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Delete todo-list by Id
+// @Security ApiKeyAuth
+// @Tags lists
+// @Description delete todo-list by id
+// @ID delete-list-by-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} StatusResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
+// @Router /api/lists/:id [delete]
 func (h *Handler) deleteListByID(w http.ResponseWriter, r *http.Request) {
 
 	userId, vars := h.getUserId(w, r), mux.Vars(r)
