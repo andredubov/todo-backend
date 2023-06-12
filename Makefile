@@ -44,4 +44,4 @@ cover:
 	go tool cover -html cover.out -o cover.html
 
 swag:
-	swag init -g internal/app/app.go
+	swag init -g cmd/app/main.go
