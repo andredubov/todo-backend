@@ -22,28 +22,28 @@ func NewPostgresTodoListRepository(db *sqlx.DB) *postgresTodoListRepository {
 	return &postgresTodoListRepository{db: db}
 }
 
-func (r *postgresTodoListRepository) Create(ctx context.Context, todolist domain.TodoList, userID int) error {
+func (r *postgresTodoListRepository) Create(ctx context.Context, todolist domain.TodoList, userID int) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	var todoListID int
+	var todoListId int
 	createTodoListQuery := fmt.Sprintf("INSERT INTO %s (title, description) VALUES ($1, $2) RETURNING id", todoListTable)
 	row := r.db.QueryRow(createTodoListQuery, todolist.Title, todolist.Description)
-	if err := row.Scan(&todoListID); err != nil {
+	if err := row.Scan(&todoListId); err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	createUsersListsQuery := fmt.Sprintf("INSERT INTO %s (user_id, list_id) VALUES ($1, $2) RETURNING id", usersListsTable)
-	_, err = tx.Exec(createUsersListsQuery, userID, todoListID)
+	_, err = tx.Exec(createUsersListsQuery, userID, todoListId)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
-	return tx.Commit()
+	return todoListId, tx.Commit()
 }
 
 func (r *postgresTodoListRepository) GetByUserId(ctx context.Context, userId int) ([]domain.TodoList, error) {

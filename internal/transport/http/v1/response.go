@@ -12,6 +12,10 @@ type (
 		Data []domain.TodoList `json:"data"`
 	}
 
+	GetTodoItemResponse struct {
+		Data []domain.TodoItem `json:"data"`
+	}
+
 	SignInResponse struct {
 		AccessToken   string `json:"accessToken"`
 		ResfreshToken string `json:"refreshToken"`

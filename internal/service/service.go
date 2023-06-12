@@ -14,7 +14,7 @@ type Users interface {
 }
 
 type TodoList interface {
-	Create(ctx context.Context, todolist domain.TodoList, userId int) error
+	Create(ctx context.Context, todolist domain.TodoList, userId int) (int, error)
 	GetByUserId(ctx context.Context, userId int) ([]domain.TodoList, error)
 	GetById(ctx context.Context, userId, listId int) (domain.TodoList, error)
 	Delete(ctx context.Context, userId, listId int) error
@@ -23,6 +23,12 @@ type TodoList interface {
 }
 
 type TodoItem interface {
+	Create(ctx context.Context, listId int, item domain.TodoItem) (int, error)
+	GetAll(ctx context.Context, userId, listId int) ([]domain.TodoItem, error)
+	GetById(ctx context.Context, userId, itemId int) (domain.TodoItem, error)
+	Delete(ctx context.Context, userId, itemId int) error
+	Update(ctx context.Context, userId, itemId int, item domain.TodoItem) error
+	Validate(todolist domain.TodoItem) error
 }
 
 type Service struct {

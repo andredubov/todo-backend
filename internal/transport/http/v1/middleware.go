@@ -14,9 +14,9 @@ const (
 	authorizationHeader = "Authorization"
 )
 
-func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) domain.User {
+func (h *Handler) getUserId(w http.ResponseWriter, r *http.Request) int {
 	user := r.Context().Value(domain.User{}).(domain.User)
-	return user
+	return user.Id
 }
 
 func (h *Handler) userIdentity(next http.Handler) http.Handler {

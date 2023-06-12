@@ -21,7 +21,7 @@ func (s *todoListService) Validate(todolist domain.TodoList) error {
 	return nil
 }
 
-func (s *todoListService) Create(ctx context.Context, todolist domain.TodoList, userID int) error {
+func (s *todoListService) Create(ctx context.Context, todolist domain.TodoList, userID int) (int, error) {
 	return s.repo.Create(ctx, todolist, userID)
 }
 
