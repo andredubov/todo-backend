@@ -6,7 +6,7 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) getAllItems(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) getItems(w http.ResponseWriter, r *http.Request) {
 
 }
 

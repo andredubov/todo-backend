@@ -17,7 +17,7 @@ func NewUsersService(repo repository.Users) *UsersService {
 	}
 }
 
-func (s *UsersService) Validate(domain.User) error {
+func (s *UsersService) Validate(user domain.User) error {
 	return nil
 }
 

@@ -13,6 +13,11 @@ type Users interface {
 }
 
 type TodoList interface {
+	Create(ctx context.Context, todolist domain.TodoList, userId int) error
+	GetByUserId(ctx context.Context, userId int) ([]domain.TodoList, error)
+	GetById(ctx context.Context, userId, listId int) (domain.TodoList, error)
+	Delete(ctx context.Context, userId, listId int) error
+	Update(ctx context.Context, userId, listId int, input domain.TodoList) error
 }
 
 type TodoItem interface {
@@ -26,6 +31,7 @@ type Repository struct {
 
 func New(db *sqlx.DB) *Repository {
 	return &Repository{
-		Users: NewPostgresUsersRepository(db),
+		Users:    NewPostgresUsersRepository(db),
+		TodoList: NewPostgresTodoListRepository(db),
 	}
 }

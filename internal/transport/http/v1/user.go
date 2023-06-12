@@ -3,28 +3,16 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/andredubov/todo-backend/internal/domain"
+	"github.com/pkg/errors"
 )
 
 const (
 	timeout = 5 * time.Second
-)
-
-type (
-	SignInRequest struct {
-		AccessToken   string `json:"email"`
-		ResfreshToken string `json:"password"`
-	}
-
-	SignInResponse struct {
-		AccessToken   string `json:"accessToken"`
-		ResfreshToken string `json:"refreshToken"`
-	}
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -32,18 +20,18 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	var user domain.User
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, err)
+		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
 		return
 	}
 
 	if err := h.services.Users.Validate(user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, err)
+		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid"))
 		return
 	}
 
 	hash, err := h.passwordHasher.Hash(user.Password)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable make password hash"))
 		return
 	}
 
@@ -53,16 +41,14 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if err := h.services.Users.Create(ctx, user); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable signup a user"))
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseHeader(w, http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(user); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		message := fmt.Sprintf(`{"error": "%s"}`, err.Error())
-		w.Write([]byte(message))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
 		return
 	}
 }
@@ -72,18 +58,18 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	var user domain.User
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, err)
+		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
 		return
 	}
 
 	if err := h.services.Users.Validate(user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, err)
+		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the signin request data was not valid"))
 		return
 	}
 
 	hash, err := h.passwordHasher.Hash(user.Password)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "password hashing error"))
 		return
 	}
 
@@ -94,30 +80,28 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err = h.services.Users.GetByCredentials(ctx, user.Email, user.Password)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find a user by its credentials"))
 		return
 	}
 
-	accessToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.ID), h.jwtConfig.AccessTokenTTL)
+	accessToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.AccessTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create access jwt token"))
 		return
 	}
 
-	refreshToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.ID), h.jwtConfig.RefreshTokenTTL)
+	refreshToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.RefreshTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, err)
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create refresh jwt token"))
 		return
 	}
 
-	h.memoryCache.Set(user.ID, user, h.cacheTTL)
+	h.memoryCache.Set(user.Id, user, h.cacheTTL)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseHeader(w, http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(SignInResponse{AccessToken: accessToken, ResfreshToken: refreshToken}); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		message := fmt.Sprintf(`{"error": "%s"}`, err.Error())
-		w.Write([]byte(message))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
 		return
 	}
 }

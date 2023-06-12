@@ -14,6 +14,11 @@ const (
 	authorizationHeader = "Authorization"
 )
 
+func (h *Handler) getUser(w http.ResponseWriter, r *http.Request) domain.User {
+	user := r.Context().Value(domain.User{}).(domain.User)
+	return user
+}
+
 func (h *Handler) userIdentity(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +35,7 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), domain.User{}, domain.User{ID: id})
+		ctx := context.WithValue(r.Context(), domain.User{}, domain.User{Id: id})
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
