@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/andredubov/todo-backend/docs"
 	"github.com/andredubov/todo-backend/internal/config"
 	"github.com/andredubov/todo-backend/internal/service"
 	"github.com/andredubov/todo-backend/pkg/auth"
 	"github.com/andredubov/todo-backend/pkg/cache"
 	"github.com/andredubov/todo-backend/pkg/hash"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Handler struct {
@@ -36,6 +38,8 @@ func NewHandler(services *service.Service, tokenManager auth.TokenManager, passw
 func (h *Handler) InitRoutes(cfg config.Config) http.Handler {
 
 	router := mux.NewRouter()
+
+	router.PathPrefix("/swagger/*").Handler(httpSwagger.WrapHandler)
 
 	getRouter := router.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/api/lists", h.getLists)
