@@ -41,5 +41,6 @@ func New(repo *repository.Repository) *Service {
 	return &Service{
 		Users:    NewUsersService(repo.Users),
 		TodoList: NewTodoListService(repo.TodoList),
+		TodoItem: NewTodoItemService(repo.TodoItem),
 	}
 }
