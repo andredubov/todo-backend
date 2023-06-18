@@ -8,7 +8,7 @@ import (
 )
 
 type Users interface {
-	Create(ctx context.Context, user domain.User) error
+	Create(ctx context.Context, user domain.User) (int, error)
 	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
 }
 

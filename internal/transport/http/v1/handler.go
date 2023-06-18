@@ -3,35 +3,26 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	_ "github.com/andredubov/todo-backend/docs"
 	"github.com/andredubov/todo-backend/internal/config"
 	"github.com/andredubov/todo-backend/internal/service"
 	"github.com/andredubov/todo-backend/pkg/auth"
-	"github.com/andredubov/todo-backend/pkg/cache"
-	"github.com/andredubov/todo-backend/pkg/hash"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Handler struct {
-	services       *service.Service
-	tokenManager   auth.TokenManager
-	passwordHasher hash.PasswordHasher
-	memoryCache    cache.Cache
-	jwtConfig      config.JWTConfig
-	cacheTTL       time.Duration
+	services     *service.Service
+	tokenManager auth.TokenManager
+	jwtConfig    config.JWTConfig
 }
 
-func NewHandler(services *service.Service, tokenManager auth.TokenManager, passwordHasher hash.PasswordHasher, memoryCache cache.Cache, jwtConfig config.JWTConfig, cacheTTL time.Duration) *Handler {
+func NewHandler(services *service.Service, tokenManager auth.TokenManager, jwtConfig config.JWTConfig) *Handler {
 	return &Handler{
-		tokenManager:   tokenManager,
-		services:       services,
-		passwordHasher: passwordHasher,
-		memoryCache:    memoryCache,
-		jwtConfig:      jwtConfig,
-		cacheTTL:       cacheTTL,
+		tokenManager: tokenManager,
+		services:     services,
+		jwtConfig:    jwtConfig,
 	}
 }
 

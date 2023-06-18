@@ -49,7 +49,7 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 
 	itemId, err := h.services.TodoItem.Create(ctx, listId, todoItem)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create a todo-item"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create a todo-item"))
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(todoItem); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }
@@ -90,14 +90,14 @@ func (h *Handler) getItems(w http.ResponseWriter, r *http.Request) {
 
 	todoItems, err := h.services.TodoItem.GetAll(ctx, userId, listId)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find any todolists by user id"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find any todolists by user id"))
 		return
 	}
 
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(GetTodoItemResponse{Data: todoItems}); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }
@@ -129,14 +129,14 @@ func (h *Handler) getItemByID(w http.ResponseWriter, r *http.Request) {
 
 	todoItem, err := h.services.TodoItem.GetById(ctx, userId, itemId)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find any todo-item by user id"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find any todo-item by user id"))
 		return
 	}
 
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(todoItem); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }
@@ -181,7 +181,7 @@ func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(StatusResponse{success}); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }
@@ -219,7 +219,7 @@ func (h *Handler) deleteItemByID(w http.ResponseWriter, r *http.Request) {
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(StatusResponse{success}); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }

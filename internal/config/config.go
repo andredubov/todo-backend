@@ -123,11 +123,13 @@ func unmarshal(cfg *Config) error {
 func setFromEnv(cfg *Config) error {
 
 	cfg.Postgres.Host = os.Getenv(PostgresHost)
-	port, err := strconv.Atoi(os.Getenv(PostgresPort))
-	if err != nil {
-		return err
+	if os.Getenv(PostgresPort) != "" {
+		port, err := strconv.Atoi(os.Getenv(PostgresPort))
+		if err != nil {
+			return err
+		}
+		cfg.Postgres.Port = port
 	}
-	cfg.Postgres.Port = port
 	cfg.Postgres.DatabaseName = os.Getenv(PostgresDatabaseName)
 	cfg.Postgres.Username = os.Getenv(PostgresUsername)
 	cfg.Postgres.Password = os.Getenv(PostgresPassword)

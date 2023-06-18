@@ -15,7 +15,6 @@ import (
 	"github.com/andredubov/todo-backend/internal/service"
 	transport "github.com/andredubov/todo-backend/internal/transport/http/v1"
 	"github.com/andredubov/todo-backend/pkg/auth"
-	"github.com/andredubov/todo-backend/pkg/cache"
 	"github.com/andredubov/todo-backend/pkg/database"
 	"github.com/andredubov/todo-backend/pkg/hash"
 	"github.com/andredubov/todo-backend/pkg/logger"
@@ -55,10 +54,11 @@ func main() {
 		return
 	}
 
-	memcache, hasher := cache.NewMemoryCache(), hash.NewSHA1Hasher(cfg.Auth.PasswordSalt)
+	hasher := hash.NewSHA1Hasher(cfg.Auth.PasswordSalt)
+
 	respository := repository.New(db)
-	services := service.New(respository)
-	handler := transport.NewHandler(services, tokenManager, hasher, memcache, cfg.Auth.JWT, cfg.CacheTTL).InitRoutes(cfg)
+	services := service.New(respository, hasher)
+	handler := transport.NewHandler(services, tokenManager, cfg.Auth.JWT).InitRoutes(cfg)
 
 	srv := server.New(cfg, handler)
 

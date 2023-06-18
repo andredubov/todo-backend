@@ -44,7 +44,7 @@ func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 
 	listId, err := h.services.TodoList.Create(ctx, todoList, userId)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create a todolist"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create a todolist"))
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(todoList); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }

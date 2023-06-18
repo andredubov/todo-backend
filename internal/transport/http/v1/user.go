@@ -41,26 +41,21 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := h.passwordHasher.Hash(user.Password)
-	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable make password hash"))
-		return
-	}
-
-	user.Password = hash
-
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	if err := h.services.Users.Create(ctx, user); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable signup a user"))
+	userId, err := h.services.Users.Create(ctx, user)
+	if err != nil {
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to signup a user"))
 		return
 	}
 
 	h.writeResponseHeader(w, http.StatusOK)
 
+	user.Id = userId
+
 	if err := json.NewEncoder(w).Encode(user); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }
@@ -91,41 +86,31 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := h.passwordHasher.Hash(user.Password)
-	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "password hashing error"))
-		return
-	}
-
-	user.Password = hash
-
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	user, err = h.services.Users.GetByCredentials(ctx, user.Email, user.Password)
+	user, err := h.services.Users.GetByCredentials(ctx, user.Email, user.Password)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find a user by its credentials"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find a user by its credentials"))
 		return
 	}
 
 	accessToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.AccessTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create access jwt token"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create access jwt token"))
 		return
 	}
 
 	refreshToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.RefreshTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable create refresh jwt token"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create refresh jwt token"))
 		return
 	}
-
-	h.memoryCache.Set(user.Id, user, h.cacheTTL)
 
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(SignInResponse{AccessToken: accessToken, ResfreshToken: refreshToken}); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
 }

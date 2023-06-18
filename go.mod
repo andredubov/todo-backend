@@ -15,12 +15,19 @@ require (
 )
 
 require (
+	github.com/dvln/go-difflib v0.0.0-20160110105554-792786c7400a // indirect
+	github.com/dvln/go-spew v0.0.0-20161022190105-ab0ae842c130 // indirect
+)
+
+require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/dvln/testify v0.0.0-20161024040450-c9680faee19e
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
 	github.com/go-openapi/swag v0.22.4 // indirect
+	github.com/golang/mock v1.6.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
