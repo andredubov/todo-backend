@@ -43,5 +43,8 @@ cover:
 	go test -v -coverprofile cover.out ./...
 	go tool cover -html cover.out -o cover.html
 
+gen-mocks:
+	cd ./internal/service && go generate
+
 swag:
 	swag init -g ./cmd/app/main.go
