@@ -7,7 +7,6 @@ import (
 	"github.com/andredubov/todo-backend/internal/domain"
 	"github.com/andredubov/todo-backend/internal/repository"
 	"github.com/andredubov/todo-backend/pkg/hash"
-	"github.com/pkg/errors"
 	"gopkg.in/validator.v2"
 )
 
@@ -26,11 +25,11 @@ func NewUsersService(repo repository.Users, hasher hash.PasswordHasher) *UsersSe
 func (s *UsersService) Validate(user domain.User) error {
 
 	if err := validator.Validate(user); err != nil {
-		return errors.Wrap(err, "sign-up input data not valid")
+		return err
 	}
 
 	if _, err := mail.ParseAddress(user.Email); err != nil {
-		return errors.Wrap(err, "sign-up input data not valid")
+		return err
 	}
 
 	return nil

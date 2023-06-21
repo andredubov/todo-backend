@@ -37,7 +37,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.services.Users.Validate(user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid"))
+		h.writeResponseWithError(w, http.StatusBadRequest, err)
 		return
 	}
 

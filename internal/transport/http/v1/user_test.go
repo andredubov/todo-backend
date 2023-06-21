@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -87,6 +88,98 @@ func TestHandler_signUp(t *testing.T) {
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"id\":1,\"name\":\"Alex\",\"email\":\"alex@gmail.com\",\"password\":\"qwerty\"}\n",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Username is less than min available length",
+			inputRequestBody: "{\"name\": \"ad\", \"email\": \"alex@gmail.com\", \"password\": \"qwerty\"}",
+			inputUser:        domain.User{Name: "ad", Email: "alex@gmail.com", Password: "qwerty"},
+			mockBehavior: func(s *mock_service.MockUsers, user domain.User) {
+				s.EXPECT().Validate(user).Return(errors.New("Name: less than min"))
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"Name: less than min\"}",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Username is greater than max available length",
+			inputRequestBody: "{\"name\": \"12345678912345678912345678912345678912345\", \"email\": \"alex@gmail.com\", \"password\": \"qwerty\"}",
+			inputUser:        domain.User{Name: "12345678912345678912345678912345678912345", Email: "alex@gmail.com", Password: "qwerty"},
+			mockBehavior: func(s *mock_service.MockUsers, user domain.User) {
+				s.EXPECT().Validate(user).Return(errors.New("Name: greater than max"))
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"Name: greater than max\"}",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Password is less than min available length",
+			inputRequestBody: "{\"name\": \"Alex\", \"email\": \"alex@gmail.com\", \"password\": \"qwert\"}",
+			inputUser:        domain.User{Name: "Alex", Email: "alex@gmail.com", Password: "qwert"},
+			mockBehavior: func(s *mock_service.MockUsers, user domain.User) {
+				s.EXPECT().Validate(user).Return(errors.New("Password: less than min"))
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"Password: less than min\"}",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Incorrect email",
+			inputRequestBody: "{\"name\": \"Alex\", \"email\": \"alexgmailcom\", \"password\": \"qwerty\"}",
+			inputUser:        domain.User{Name: "Alex", Email: "alexgmailcom", Password: "qwerty"},
+			mockBehavior: func(s *mock_service.MockUsers, user domain.User) {
+				s.EXPECT().Validate(user).Return(errors.New("mail: missing '@' or angle-addr"))
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"mail: missing '@' or angle-addr\"}",
 		},
 	}
 
