@@ -12,6 +12,7 @@ import (
 
 const (
 	authorizationHeader = "Authorization"
+	bearer              = "Bearer"
 )
 
 func (h *Handler) getUserId(w http.ResponseWriter, r *http.Request) int {
@@ -50,7 +51,7 @@ func (h *Handler) parseAuthHeader(w http.ResponseWriter, r *http.Request) (strin
 	}
 
 	headerParts := strings.Split(header, " ")
-	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+	if len(headerParts) != 2 || headerParts[0] != bearer {
 		return "", errors.New("invalid auth header")
 	}
 
