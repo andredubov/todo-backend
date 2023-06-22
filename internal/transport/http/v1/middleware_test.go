@@ -106,6 +106,28 @@ func TestHandler_userIdentity(t *testing.T) {
 			expectedStatusCode:   http.StatusUnauthorized,
 			expectedResponseBody: "{\"message\": \"empty auth header\"}",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:                 "Invalid bearer",
+			headerName:           authorizationHeader,
+			headerValue:          "Beare token",
+			token:                "token",
+			mockBehavior:         func(m *mock_auth.MockTokenManager, token string) {},
+			expectedStatusCode:   http.StatusUnauthorized,
+			expectedResponseBody: "{\"message\": \"invalid auth header\"}",
+		},
 	}
 
 	for _, testCase := range testCases {
