@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -58,6 +59,24 @@ func TestItem_Create(t *testing.T) {
 			},
 			wantId:  1,
 			wantErr: false,
+		},
+		{
+			name: "Empty Fields",
+			input: args{
+				listId: 1,
+				item: domain.TodoItem{
+					Title:       "",
+					Description: "test description",
+				},
+			},
+			mockBehavior: func(args args, id int) {
+				mock.ExpectBegin()
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(id).RowError(0, errors.New("insert error"))
+				itemsTableQuery := fmt.Sprintf("INSERT INTO %s", todoItemsTable)
+				mock.ExpectQuery(itemsTableQuery).WithArgs(args.item.Title, args.item.Description).WillReturnRows(rows)
+				mock.ExpectRollback()
+			},
+			wantErr: true,
 		},
 	}
 
