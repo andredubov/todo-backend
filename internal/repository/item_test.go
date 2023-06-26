@@ -115,3 +115,81 @@ func TestItem_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestTodoItem_GetAll(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	dbx := sqlx.NewDb(db, "sqlmock")
+	todoItemRepository := NewPostgresTodoItemRepository(dbx)
+
+	type (
+		args struct {
+			listId int
+			userId int
+		}
+		test struct {
+			name         string
+			mockBehavior func()
+			input        args
+			want         []domain.TodoItem
+			wantErr      bool
+		}
+	)
+
+	tests := []test{
+		{
+			name: "Ok",
+			mockBehavior: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "description", "done"}).
+					AddRow(1, "title1", "description1", true).
+					AddRow(2, "title2", "description2", false).
+					AddRow(3, "title3", "description3", false)
+
+				query := fmt.Sprintf("SELECT (.+) FROM %s ti INNER JOIN %s li on (.+) INNER JOIN %s ul on (.+) WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectQuery(query).WithArgs(1, 1).WillReturnRows(rows)
+			},
+			input: args{
+				listId: 1,
+				userId: 1,
+			},
+			want: []domain.TodoItem{
+				{Id: 1, Title: "title1", Description: "description1", Done: true},
+				{Id: 2, Title: "title2", Description: "description2", Done: false},
+				{Id: 3, Title: "title3", Description: "description3", Done: false},
+			},
+		},
+		{
+			name: "No Records",
+			mockBehavior: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "description", "done"})
+				query := fmt.Sprintf("SELECT (.+) FROM %s ti INNER JOIN %s li on (.+) INNER JOIN %s ul on (.+) WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectQuery(query).WithArgs(1, 1).WillReturnRows(rows)
+			},
+			input: args{
+				listId: 1,
+				userId: 1,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			test.mockBehavior()
+
+			got, err := todoItemRepository.GetAll(context.TODO(), test.input.userId, test.input.listId)
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.want, got)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
