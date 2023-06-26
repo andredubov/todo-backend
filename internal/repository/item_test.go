@@ -78,6 +78,25 @@ func TestItem_Create(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Failed second insert",
+			input: args{
+				listId: 1,
+				item: domain.TodoItem{
+					Title:       "test title",
+					Description: "test description",
+				},
+			},
+			mockBehavior: func(args args, id int) {
+				mock.ExpectBegin()
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(id)
+				itemsTableQuery, listsItemsTableQuery := fmt.Sprintf("INSERT INTO %s", todoItemsTable), fmt.Sprintf("INSERT INTO %s", listsItemsTable)
+				mock.ExpectQuery(itemsTableQuery).WithArgs(args.item.Title, args.item.Description).WillReturnRows(rows)
+				mock.ExpectExec(listsItemsTableQuery).WithArgs(args.listId, id).WillReturnError(errors.New("insert error"))
+				mock.ExpectRollback()
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, test := range tests {
