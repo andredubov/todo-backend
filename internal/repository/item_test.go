@@ -232,6 +232,19 @@ func TestTodoItem_GetById(t *testing.T) {
 			},
 			want: domain.TodoItem{Id: 1, Title: "title1", Description: "description1", Done: true},
 		},
+		{
+			name: "Not Found",
+			mockBehavior: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "description", "done"})
+				query := fmt.Sprintf("SELECT (.+) FROM %s ti INNER JOIN %s li on (.+) INNER JOIN %s ul on (.+) WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectQuery(query).WithArgs(765, 1).WillReturnRows(rows)
+			},
+			input: args{
+				itemId: 765,
+				userId: 1,
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, test := range tests {
