@@ -142,6 +142,17 @@ func TestList_GetByUserId(t *testing.T) {
 				{Id: 3, Title: "title3", Description: "description3"},
 			},
 		},
+		{
+			name: "No records",
+			mockBehavior: func(args args) {
+				rows := sqlmock.NewRows([]string{"id", "title", "description"})
+				query := fmt.Sprintf("SELECT (.+) FROM %s tl INNER JOIN %s ul on (.+) WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectQuery(query).WithArgs(args.userId).WillReturnRows(rows)
+			},
+			input: args{
+				userId: 2,
+			},
+		},
 	}
 
 	for _, test := range tests {
