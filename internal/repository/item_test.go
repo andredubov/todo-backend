@@ -344,9 +344,9 @@ func TestTodoItem_Update(t *testing.T) {
 
 	type (
 		args struct {
-			itemId   int
-			userId   int
-			todoItem domain.TodoItem
+			itemId              int
+			userId              int
+			updateTodoItemInput domain.UpdateTodoItemInput
 		}
 		test struct {
 			name         string
@@ -366,11 +366,51 @@ func TestTodoItem_Update(t *testing.T) {
 			input: args{
 				itemId: 1,
 				userId: 1,
-				todoItem: domain.TodoItem{
-					Title:       "new title",
-					Description: "new description",
-					Done:        true,
+				updateTodoItemInput: domain.UpdateTodoItemInput{
+					Title:       stringPointer("new title"),
+					Description: stringPointer("new description"),
+					Done:        boolPointer(true),
 				},
+			},
+		},
+		{
+			name: "OK_WithoutDone",
+			mockBehavior: func() {
+				query := fmt.Sprintf("UPDATE %s ti SET (.+) FROM %s li, %s ul WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs("new title", "new description", 1, 1).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				itemId: 1,
+				userId: 1,
+				updateTodoItemInput: domain.UpdateTodoItemInput{
+					Title:       stringPointer("new title"),
+					Description: stringPointer("new description"),
+				},
+			},
+		},
+		{
+			name: "OK_WithoutDoneAndDescription",
+			mockBehavior: func() {
+				query := fmt.Sprintf("UPDATE %s ti SET (.+) FROM %s li, %s ul WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs("new title", 1, 1).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				itemId: 1,
+				userId: 1,
+				updateTodoItemInput: domain.UpdateTodoItemInput{
+					Title: stringPointer("new title"),
+				},
+			},
+		},
+		{
+			name: "OK_NoInputFields",
+			mockBehavior: func() {
+				query := fmt.Sprintf("UPDATE %s ti SET FROM %s li, %s ul WHERE (.+)", todoItemsTable, listsItemsTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs(1, 1).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				itemId: 1,
+				userId: 1,
 			},
 		},
 	}
@@ -380,7 +420,7 @@ func TestTodoItem_Update(t *testing.T) {
 
 			test.mockBehavior()
 
-			err := todoItemRepository.Update(context.TODO(), test.input.userId, test.input.itemId, test.input.todoItem)
+			err := todoItemRepository.Update(context.TODO(), test.input.userId, test.input.itemId, test.input.updateTodoItemInput)
 			if test.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -390,4 +430,12 @@ func TestTodoItem_Update(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+}
+
+func stringPointer(s string) *string {
+	return &s
+}
+
+func boolPointer(b bool) *bool {
+	return &b
 }

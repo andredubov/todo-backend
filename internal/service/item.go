@@ -37,6 +37,6 @@ func (s *todoItemService) Delete(ctx context.Context, userId, itemId int) error 
 	return s.repo.Delete(ctx, userId, itemId)
 }
 
-func (s *todoItemService) Update(ctx context.Context, userId, itemId int, item domain.TodoItem) error {
-	return s.repo.Update(ctx, userId, itemId, item)
+func (s *todoItemService) Update(ctx context.Context, userId, itemId int, input domain.UpdateTodoItemInput) error {
+	return s.repo.Update(ctx, userId, itemId, input)
 }

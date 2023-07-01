@@ -17,7 +17,7 @@ type TodoList interface {
 	GetByUserId(ctx context.Context, userId int) ([]domain.TodoList, error)
 	GetById(ctx context.Context, userId, listId int) (domain.TodoList, error)
 	Delete(ctx context.Context, userId, listId int) error
-	Update(ctx context.Context, userId, listId int, input domain.TodoList) error
+	Update(ctx context.Context, userId, listId int, input domain.UpdateTodoListInput) error
 }
 
 type TodoItem interface {
@@ -25,7 +25,7 @@ type TodoItem interface {
 	GetAll(ctx context.Context, userId, listId int) ([]domain.TodoItem, error)
 	GetById(ctx context.Context, userId, itemId int) (domain.TodoItem, error)
 	Delete(ctx context.Context, userId, itemId int) error
-	Update(ctx context.Context, userId, itemId int, item domain.TodoItem) error
+	Update(ctx context.Context, userId, itemId int, input domain.UpdateTodoItemInput) error
 }
 
 type Repository struct {

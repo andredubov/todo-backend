@@ -51,18 +51,18 @@ func (mr *MockUsersMockRecorder) Create(ctx, user interface{}) *gomock.Call {
 }
 
 // GetByCredentials mocks base method.
-func (m *MockUsers) GetByCredentials(ctx context.Context, email, password string) (domain.User, error) {
+func (m *MockUsers) GetByCredentials(ctx context.Context, credentials domain.Credentials) (domain.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByCredentials", ctx, email, password)
+	ret := m.ctrl.Call(m, "GetByCredentials", ctx, credentials)
 	ret0, _ := ret[0].(domain.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByCredentials indicates an expected call of GetByCredentials.
-func (mr *MockUsersMockRecorder) GetByCredentials(ctx, email, password interface{}) *gomock.Call {
+func (mr *MockUsersMockRecorder) GetByCredentials(ctx, credentials interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByCredentials", reflect.TypeOf((*MockUsers)(nil).GetByCredentials), ctx, email, password)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByCredentials", reflect.TypeOf((*MockUsers)(nil).GetByCredentials), ctx, credentials)
 }
 
 // Validate mocks base method.

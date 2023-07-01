@@ -80,28 +80,36 @@ func (r *postgresTodoItemRepository) Delete(ctx context.Context, userId, itemId 
 	return err
 }
 
-func (r *postgresTodoItemRepository) Update(ctx context.Context, userId, itemId int, todoItem domain.TodoItem) error {
+func (r *postgresTodoItemRepository) Update(ctx context.Context, userId, itemId int, input domain.UpdateTodoItemInput) error {
 
 	setValues, args, argId := make([]string, 0), make([]interface{}, 0), 1
 
-	setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
-	args = append(args, todoItem.Title)
-	argId++
+	if input.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+		args = append(args, *input.Title)
+		argId++
+	}
 
-	setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
-	args = append(args, todoItem.Description)
-	argId++
+	if input.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *input.Description)
+		argId++
+	}
 
-	setValues = append(setValues, fmt.Sprintf("done=$%d", argId))
-	args = append(args, todoItem.Done)
-	argId++
+	if input.Done != nil {
+		setValues = append(setValues, fmt.Sprintf("done=$%d", argId))
+		args = append(args, *input.Done)
+		argId++
+	}
 
 	setQuery := strings.Join(setValues, ", ")
 
 	query := fmt.Sprintf(`UPDATE %s ti SET %s FROM %s li, %s ul WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id = $%d AND ti.id = $%d`,
 		todoItemsTable, setQuery, listsItemsTable, usersListsTable, argId, argId+1)
+
 	args = append(args, userId, itemId)
 
 	_, err := r.db.Exec(query, args...)
+
 	return err
 }

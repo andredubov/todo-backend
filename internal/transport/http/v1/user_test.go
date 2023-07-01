@@ -87,7 +87,7 @@ func TestHandler_signUp(t *testing.T) {
 				s.EXPECT().Create(gomock.Any(), user).Return(1, nil).After(first)
 			},
 			expectedStatusCode:   http.StatusOK,
-			expectedResponseBody: "{\"id\":1,\"name\":\"Alex\",\"email\":\"alex@gmail.com\",\"password\":\"qwerty\"}\n",
+			expectedResponseBody: "{\"id\":1}\n",
 		},
 		{
 			enviroment: enviroment{

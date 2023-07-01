@@ -47,12 +47,12 @@ func (s *UsersService) Create(ctx context.Context, user domain.User) (int, error
 	return s.repo.Create(ctx, user)
 }
 
-func (s *UsersService) GetByCredentials(ctx context.Context, email, password string) (domain.User, error) {
+func (s *UsersService) GetByCredentials(ctx context.Context, credentials domain.Credentials) (domain.User, error) {
 
-	hash, err := s.passwordHasher.Hash(password)
+	hash, err := s.passwordHasher.Hash(credentials.Password)
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	return s.repo.GetByCredentials(ctx, email, hash)
+	return s.repo.GetByCredentials(ctx, credentials.Email, hash)
 }

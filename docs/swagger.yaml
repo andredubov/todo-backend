@@ -1,5 +1,13 @@
 basePath: /
 definitions:
+  domain.Credentials:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    type: object
   domain.TodoItem:
     properties:
       description:
@@ -20,6 +28,22 @@ definitions:
       title:
         type: string
     type: object
+  domain.UpdateTodoItemInput:
+    properties:
+      description:
+        type: string
+      done:
+        type: boolean
+      title:
+        type: string
+    type: object
+  domain.UpdateTodoListInput:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
   domain.User:
     properties:
       email:
@@ -27,8 +51,10 @@ definitions:
       id:
         type: integer
       name:
+        minLength: 3
         type: string
       password:
+        minLength: 6
         type: string
     type: object
   handler.ErrorResponse:
@@ -147,7 +173,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.TodoItem'
+          $ref: '#/definitions/domain.UpdateTodoItemInput'
       produces:
       - application/json
       responses:
@@ -328,7 +354,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.TodoList'
+          $ref: '#/definitions/domain.UpdateTodoListInput'
       produces:
       - application/json
       responses:
@@ -403,7 +429,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/domain.Credentials'
       produces:
       - application/json
       responses:

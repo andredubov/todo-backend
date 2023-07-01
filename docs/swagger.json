@@ -86,7 +86,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.TodoItem"
+                            "$ref": "#/definitions/domain.UpdateTodoItemInput"
                         }
                     }
                 ],
@@ -367,7 +367,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.TodoList"
+                            "$ref": "#/definitions/domain.UpdateTodoListInput"
                         }
                     }
                 ],
@@ -530,7 +530,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/domain.Credentials"
                         }
                     }
                 ],
@@ -629,6 +629,18 @@
         }
     },
     "definitions": {
+        "domain.Credentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
         "domain.TodoItem": {
             "type": "object",
             "properties": {
@@ -660,6 +672,31 @@
                 }
             }
         },
+        "domain.UpdateTodoItemInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "done": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UpdateTodoListInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.User": {
             "type": "object",
             "properties": {
@@ -670,10 +707,12 @@
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },

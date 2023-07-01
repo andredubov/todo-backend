@@ -33,8 +33,8 @@ func (s *todoListService) GetById(ctx context.Context, userId, listId int) (doma
 	return s.repo.GetById(ctx, userId, listId)
 }
 
-func (s *todoListService) Update(ctx context.Context, userId, listId int, todolist domain.TodoList) error {
-	return s.repo.Update(ctx, userId, listId, todolist)
+func (s *todoListService) Update(ctx context.Context, userId, listId int, input domain.UpdateTodoListInput) error {
+	return s.repo.Update(ctx, userId, listId, input)
 }
 
 func (s *todoListService) Delete(ctx context.Context, userId, listId int) error {

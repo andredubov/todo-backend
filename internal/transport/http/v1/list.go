@@ -16,8 +16,8 @@ import (
 // @Tags lists
 // @Description create todo list
 // @ID create-list
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param input body domain.TodoList true "list info"
 // @Success 200 {object} domain.TodoList
 // @Failure 400,404 {object} ErrorResponse
@@ -135,9 +135,9 @@ func (h *Handler) getListByID(w http.ResponseWriter, r *http.Request) {
 // @Tags lists
 // @Description update todo-list by id
 // @ID update-list-by-id
-// @Accept  json
-// @Produce  json
-// @Param input body domain.TodoList true "item info"
+// @Accept json
+// @Produce json
+// @Param input body domain.UpdateTodoListInput true "item info"
 // @Success 200 {object} StatusResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -153,8 +153,8 @@ func (h *Handler) updateListByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var todoList domain.TodoList
-	if err := json.NewDecoder(r.Body).Decode(&todoList); err != nil {
+	var updateTodoListInput domain.UpdateTodoListInput
+	if err := json.NewDecoder(r.Body).Decode(&updateTodoListInput); err != nil {
 		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
 		return
 	}
@@ -162,7 +162,7 @@ func (h *Handler) updateListByID(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	if err := h.services.TodoList.Update(ctx, userId, todoListId, todoList); err != nil {
+	if err := h.services.TodoList.Update(ctx, userId, todoListId, updateTodoListInput); err != nil {
 		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to update a todolist by id"))
 		return
 	}
@@ -180,8 +180,8 @@ func (h *Handler) updateListByID(w http.ResponseWriter, r *http.Request) {
 // @Tags lists
 // @Description delete todo-list by id
 // @ID delete-list-by-id
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {object} StatusResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

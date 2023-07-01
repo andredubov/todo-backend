@@ -73,17 +73,17 @@ func (r *postgresTodoListRepository) Delete(ctx context.Context, userId, listId 
 	return err
 }
 
-func (r *postgresTodoListRepository) Update(ctx context.Context, userId, listId int, input domain.TodoList) error {
+func (r *postgresTodoListRepository) Update(ctx context.Context, userId, listId int, input domain.UpdateTodoListInput) error {
 
 	setValues, args, argId := make([]string, 0), make([]interface{}, 0), 1
 
-	if input.Title != "" {
+	if input.Title != nil {
 		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
 		args = append(args, input.Title)
 		argId++
 	}
 
-	if input.Description != "" {
+	if input.Description != nil {
 		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
 		args = append(args, input.Description)
 		argId++
@@ -93,6 +93,7 @@ func (r *postgresTodoListRepository) Update(ctx context.Context, userId, listId 
 
 	query := fmt.Sprintf("UPDATE %s tl SET %s FROM %s ul WHERE tl.id = ul.list_id AND ul.list_id=$%d AND ul.user_id=$%d",
 		todoListTable, setQuery, usersListsTable, argId, argId+1)
+
 	args = append(args, listId, userId)
 
 	_, err := r.db.Exec(query, args...)

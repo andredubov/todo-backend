@@ -16,8 +16,8 @@ import (
 // @Tags items
 // @Description create todo item
 // @ID create-item
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param input body domain.TodoItem true "list info"
 // @Success 200 {object} domain.TodoItem
 // @Failure 400,404 {object} ErrorResponse
@@ -68,8 +68,8 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 // @Tags items
 // @Description get all todo-items
 // @ID get-all-items
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {object} GetTodoItemResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -107,8 +107,8 @@ func (h *Handler) getItems(w http.ResponseWriter, r *http.Request) {
 // @Tags items
 // @Description get todo-item by id
 // @ID get-item-by-id
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {object} domain.TodoItem
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -146,9 +146,9 @@ func (h *Handler) getItemByID(w http.ResponseWriter, r *http.Request) {
 // @Tags items
 // @Description update todo-item by id
 // @ID update-item-by-id
-// @Accept  json
-// @Produce  json
-// @Param input body domain.TodoItem true "item info"
+// @Accept json
+// @Produce json
+// @Param input body domain.UpdateTodoItemInput true "item info"
 // @Success 200 {object} StatusResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -164,8 +164,8 @@ func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var todoItem domain.TodoItem
-	if err := json.NewDecoder(r.Body).Decode(&todoItem); err != nil {
+	var updateTodoItemInput domain.UpdateTodoItemInput
+	if err := json.NewDecoder(r.Body).Decode(&updateTodoItemInput); err != nil {
 		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
 		return
 	}
@@ -173,7 +173,7 @@ func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	if err := h.services.TodoItem.Update(ctx, userId, itemId, todoItem); err != nil {
+	if err := h.services.TodoItem.Update(ctx, userId, itemId, updateTodoItemInput); err != nil {
 		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to update a todo-item by id"))
 		return
 	}
@@ -191,8 +191,8 @@ func (h *Handler) updateItemByID(w http.ResponseWriter, r *http.Request) {
 // @Tags items
 // @Description delete todo-item by id
 // @ID delete-item-by-id
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {object} StatusResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

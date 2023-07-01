@@ -9,6 +9,7 @@ import (
 
 	"github.com/andredubov/todo-backend/internal/domain"
 	"github.com/pkg/errors"
+	"gopkg.in/validator.v2"
 )
 
 const (
@@ -52,9 +53,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	h.writeResponseHeader(w, http.StatusOK)
 
-	user.Id = userId
-
-	if err := json.NewEncoder(w).Encode(user); err != nil {
+	if err := json.NewEncoder(w).Encode(domain.User{Id: userId}); err != nil {
 		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
@@ -66,7 +65,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 // @ID login
 // @Accept  json
 // @Produce  json
-// @Param input body domain.User true "credentials"
+// @Param input body domain.Credentials true "credentials"
 // @Success 200 {object} SignInResponse
 // @Failure 400,404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -74,22 +73,22 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 // @Router /auth/sign-in [post]
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
-	var user domain.User
+	var credentials domain.Credentials
 
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
 		return
 	}
 
-	if err := h.services.Users.Validate(user); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the signin request data was not valid"))
+	if err := validator.Validate(credentials); err != nil {
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "the signin request data was not valid"))
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	user, err := h.services.Users.GetByCredentials(ctx, user.Email, user.Password)
+	user, err := h.services.Users.GetByCredentials(ctx, credentials)
 	if err != nil {
 		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find a user by its credentials"))
 		return
