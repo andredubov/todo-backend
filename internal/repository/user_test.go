@@ -46,6 +46,15 @@ func TestUser_Create(t *testing.T) {
 			},
 			want: 1,
 		},
+		{
+			name: "Empty fields",
+			mockBehavior: func(user domain.User) {
+				rows := sqlmock.NewRows([]string{"id"})
+				query := fmt.Sprintf("INSERT INTO %s", usersTable)
+				mock.ExpectQuery(query).WithArgs(user.Name, user.Email, user.Password).WillReturnRows(rows)
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, test := range tests {
