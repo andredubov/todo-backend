@@ -314,3 +314,65 @@ func TestList_Delete(t *testing.T) {
 		})
 	}
 }
+
+func TestList_Update(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	dbx := sqlx.NewDb(db, "sqlmock")
+	todoListRepository := NewPostgresTodoListRepository(dbx)
+
+	type (
+		args struct {
+			userId        int
+			todoListId    int
+			todoListInput domain.UpdateTodoListInput
+		}
+
+		test struct {
+			name         string
+			mockBehavior func(args)
+			input        args
+			wantErr      bool
+		}
+	)
+
+	tests := []test{
+		{
+			name: "Ok_AllFields",
+			mockBehavior: func(args args) {
+				query := fmt.Sprintf("UPDATE %s tl SET (.+) FROM %s ul WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectExec(query).
+					WithArgs(args.todoListInput.Title, args.todoListInput.Description, args.todoListId, args.userId).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				userId:     1,
+				todoListId: 2,
+				todoListInput: domain.UpdateTodoListInput{
+					Title:       stringPointer("new title"),
+					Description: stringPointer("new description"),
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			test.mockBehavior(test.input)
+
+			err := todoListRepository.Update(context.TODO(), test.input.userId, test.input.todoListId, test.input.todoListInput)
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
