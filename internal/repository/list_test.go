@@ -202,6 +202,20 @@ func TestList_GetById(t *testing.T) {
 			},
 			want: domain.TodoList{Id: 1, Title: "title1", Description: "description1"},
 		},
+		{
+			name: "Not Found",
+			mockBehavior: func(args args) {
+				rows := sqlmock.NewRows([]string{"id", "title", "description"})
+
+				query := fmt.Sprintf("SELECT (.+) FROM %s tl INNER JOIN %s ul on (.+) WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectQuery(query).WithArgs(args.userId, args.todoListId).WillReturnRows(rows)
+			},
+			input: args{
+				userId:     1,
+				todoListId: 2,
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, test := range tests {
