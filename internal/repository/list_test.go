@@ -44,7 +44,6 @@ func TestList_Create(t *testing.T) {
 			input: args{
 				userId: 1,
 				todoList: domain.TodoList{
-					Id:          1,
 					Title:       "title",
 					Description: "description",
 				},
@@ -54,7 +53,7 @@ func TestList_Create(t *testing.T) {
 				rows := sqlmock.NewRows([]string{"id"}).AddRow(id)
 				itemsTableQuery, usersListsTableQuery := fmt.Sprintf("INSERT INTO %s", todoListTable), fmt.Sprintf("INSERT INTO %s", usersListsTable)
 				mock.ExpectQuery(itemsTableQuery).WithArgs(args.todoList.Title, args.todoList.Description).WillReturnRows(rows)
-				mock.ExpectExec(usersListsTableQuery).WithArgs(args.userId, args.todoList.Id).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(usersListsTableQuery).WithArgs(args.userId, id).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectCommit()
 			},
 			wantId:  1,
