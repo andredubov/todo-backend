@@ -59,6 +59,24 @@ func TestList_Create(t *testing.T) {
 			wantId:  1,
 			wantErr: false,
 		},
+		{
+			name: "Empty fields",
+			input: args{
+				userId: 1,
+				todoList: domain.TodoList{
+					Description: "description",
+				},
+			},
+			mockBehavior: func(args args, id int) {
+				mock.ExpectBegin()
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(id)
+				itemsTableQuery := fmt.Sprintf("INSERT INTO %s", todoListTable)
+				mock.ExpectQuery(itemsTableQuery).WithArgs(args.todoList.Title, args.todoList.Description).WillReturnRows(rows)
+				mock.ExpectRollback()
+			},
+			wantId:  1,
+			wantErr: true,
+		},
 	}
 
 	for _, test := range tests {
