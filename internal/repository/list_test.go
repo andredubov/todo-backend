@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -282,6 +283,18 @@ func TestList_Delete(t *testing.T) {
 				userId:     1,
 				todoListId: 2,
 			},
+		},
+		{
+			name: "Not found",
+			mockBehavior: func(args args) {
+				query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs(args.userId, args.todoListId).WillReturnError(sql.ErrNoRows)
+			},
+			input: args{
+				userId:     1,
+				todoListId: 3,
+			},
+			wantErr: true,
 		},
 	}
 
