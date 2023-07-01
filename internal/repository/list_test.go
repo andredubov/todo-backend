@@ -246,3 +246,58 @@ func TestList_GetById(t *testing.T) {
 		})
 	}
 }
+
+func TestList_Delete(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	dbx := sqlx.NewDb(db, "sqlmock")
+	todoListRepository := NewPostgresTodoListRepository(dbx)
+
+	type (
+		args struct {
+			userId     int
+			todoListId int
+		}
+
+		test struct {
+			name         string
+			mockBehavior func(args)
+			input        args
+			wantErr      bool
+		}
+	)
+
+	tests := []test{
+		{
+			name: "Ok",
+			mockBehavior: func(args args) {
+				query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs(args.userId, args.todoListId).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				userId:     1,
+				todoListId: 2,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			test.mockBehavior(test.input)
+
+			err := todoListRepository.Delete(context.TODO(), test.input.userId, test.input.todoListId)
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
