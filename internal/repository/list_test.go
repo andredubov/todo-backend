@@ -359,6 +359,22 @@ func TestList_Update(t *testing.T) {
 			},
 		},
 		{
+			name: "OK_WithoutTitle",
+			mockBehavior: func(args args) {
+				query := fmt.Sprintf("UPDATE %s tl SET (.+) FROM %s ul WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectExec(query).
+					WithArgs(args.todoListInput.Description, args.todoListId, args.userId).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				userId:     1,
+				todoListId: 3,
+				todoListInput: domain.UpdateTodoListInput{
+					Description: stringPointer("new description"),
+				},
+			},
+		},
+		{
 			name: "Ok_NoInputFields",
 			mockBehavior: func(args args) {
 				query := fmt.Sprintf("UPDATE %s tl SET FROM %s ul WHERE (.+)", todoListTable, usersListsTable)
