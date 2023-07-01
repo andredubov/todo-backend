@@ -358,6 +358,17 @@ func TestList_Update(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Ok_NoInputFields",
+			mockBehavior: func(args args) {
+				query := fmt.Sprintf("UPDATE %s tl SET FROM %s ul WHERE (.+)", todoListTable, usersListsTable)
+				mock.ExpectExec(query).WithArgs(args.todoListId, args.userId).WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			input: args{
+				userId:     1,
+				todoListId: 3,
+			},
+		},
 	}
 
 	for _, test := range tests {
