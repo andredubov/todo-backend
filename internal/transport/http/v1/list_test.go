@@ -48,6 +48,7 @@ func TestHandler_createList(t *testing.T) {
 			enviroment           enviroment
 			name                 string
 			jwtTTL               time.Duration
+			delay                time.Duration
 			inputRequestBody     string
 			input                args
 			mockBehavior         mockBehavior
@@ -87,6 +88,7 @@ func TestHandler_createList(t *testing.T) {
 			},
 			name:             "OK",
 			jwtTTL:           time.Duration(5 * time.Minute),
+			delay:            time.Duration(0 * time.Millisecond),
 			inputRequestBody: `{"title": "test title", "description": "test description"}`,
 			input: args{
 				userId:   1,
@@ -117,6 +119,7 @@ func TestHandler_createList(t *testing.T) {
 			},
 			name:             "No Title",
 			jwtTTL:           time.Duration(5 * time.Minute),
+			delay:            time.Duration(0 * time.Millisecond),
 			inputRequestBody: `{"description": "test description"}`,
 			input: args{
 				userId:   1,
@@ -146,6 +149,7 @@ func TestHandler_createList(t *testing.T) {
 			},
 			name:             "No Description",
 			jwtTTL:           time.Duration(5 * time.Minute),
+			delay:            time.Duration(0 * time.Millisecond),
 			inputRequestBody: `{"title": "test title"}`,
 			input: args{
 				userId:   1,
@@ -159,6 +163,34 @@ func TestHandler_createList(t *testing.T) {
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"id\":1}\n",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Token Expired",
+			jwtTTL:           time.Duration(1 * time.Millisecond),
+			delay:            time.Duration(1 * time.Second),
+			inputRequestBody: `{"title": "test title", "description": "test description"}`,
+			input: args{
+				userId:   1,
+				todoList: domain.TodoList{Title: "test title", Description: "test description"},
+			},
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
+
+			},
+			expectedStatusCode:   http.StatusUnauthorized,
+			expectedResponseBody: "{\"message\": \"Token is expired\"}",
 		},
 	}
 
@@ -190,6 +222,8 @@ func TestHandler_createList(t *testing.T) {
 				t.Error(err)
 				return
 			}
+
+			<-time.After(test.delay)
 
 			services := service.Service{TodoList: mockTodoListService}
 			h := NewHandler(&services, tokenManager, cfg.Auth.JWT)
