@@ -323,6 +323,33 @@ func TestHandler_getLists(t *testing.T) {
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"data\":[{\"id\":1,\"title\":\"title1\",\"description\":\"description1\"}]}\n",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "Empty",
+			jwtTTL: time.Duration(5 * time.Minute),
+			delay:  time.Duration(0 * time.Millisecond),
+			input: args{
+				userId: 1,
+			},
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
+				todoLists := []domain.TodoList{}
+				s.EXPECT().GetByUserId(gomock.Any(), args.userId).Return(todoLists, nil)
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"data\":[]}\n",
+		},
 	}
 
 	for _, test := range tests {
