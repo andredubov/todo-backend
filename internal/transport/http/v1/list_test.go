@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -419,6 +420,137 @@ func TestHandler_getLists(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, "/api/lists", bytes.NewBufferString(""))
+			r.Header.Set(authorizationHeader, bearer+" "+token) // set jwt token
+			router.ServeHTTP(w, r)                              // perforn request
+
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_getListByID(t *testing.T) {
+
+	type (
+		enviroment struct {
+			appEnv               string
+			httpHost             string
+			httpPort             string
+			postgresHost         string
+			postgresPort         string
+			postgresDatabaseName string
+			postgresUsername     string
+			postgresPassword     string
+			postgressSSLMode     string
+			passwordSalt         string
+			jwtSigningKey        string
+		}
+
+		args struct {
+			userId     int
+			todoListId int
+		}
+
+		mockBehavior func(s *mock_service.MockTodoList, args args)
+
+		test struct {
+			enviroment           enviroment
+			jwtTTL               time.Duration
+			delay                time.Duration
+			name                 string
+			mockBehavior         mockBehavior
+			input                args
+			expectedStatusCode   int
+			expectedResponseBody string
+		}
+	)
+
+	setEnv := func(env enviroment) {
+		os.Setenv(config.ApplicationEnvironment, env.appEnv)
+		os.Setenv(config.HttpHost, env.httpHost)
+		os.Setenv(config.HttpPort, env.httpPort)
+		os.Setenv(config.PostgresHost, env.postgresHost)
+		os.Setenv(config.PostgresPort, env.postgresPort)
+		os.Setenv(config.PostgresDatabaseName, env.postgresDatabaseName)
+		os.Setenv(config.PostgresUsername, env.postgresUsername)
+		os.Setenv(config.PostgresPassword, env.postgresPassword)
+		os.Setenv(config.PostgresSSLMode, env.postgressSSLMode)
+		os.Setenv(config.PasswordSalt, env.passwordSalt)
+		os.Setenv(config.JwtSigningKey, env.jwtSigningKey)
+	}
+
+	tests := []test{
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "OK",
+			jwtTTL: time.Duration(5 * time.Minute),
+			delay:  time.Duration(0 * time.Millisecond),
+			input: args{
+				userId:     1,
+				todoListId: 2,
+			},
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
+				todoList := domain.TodoList{Id: 1, Title: "title1", Description: "description1"}
+				s.EXPECT().GetById(gomock.Any(), args.userId, args.todoListId).Return(todoList, nil)
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"id\":1,\"title\":\"title1\",\"description\":\"description1\"}\n",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+
+			mockTodoListService := mock_service.NewMockTodoList(controller)
+			test.mockBehavior(mockTodoListService, test.input)
+
+			setEnv(test.enviroment)
+
+			cfg, err := config.Init(configPath)
+			if err != nil {
+				t.Errorf("config initializing failed: %s", err.Error())
+				return
+			}
+
+			tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			token, err := tokenManager.NewJWT(strconv.Itoa(test.input.userId), test.jwtTTL)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			<-time.After(test.delay)
+
+			services := service.Service{TodoList: mockTodoListService}
+			h := NewHandler(&services, tokenManager, cfg.Auth.JWT)
+
+			router := mux.NewRouter()
+			getRouter := router.Methods(http.MethodGet).Subrouter()
+			getRouter.HandleFunc("/api/lists/{id:[0-9]+}", h.getListByID)
+			getRouter.Use(h.userIdentity)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/lists/%d", test.input.todoListId), bytes.NewBufferString(""))
 			r.Header.Set(authorizationHeader, bearer+" "+token) // set jwt token
 			router.ServeHTTP(w, r)                              // perforn request
 
