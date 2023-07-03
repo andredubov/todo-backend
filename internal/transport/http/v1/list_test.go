@@ -8,12 +8,13 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/andredubov/todo-backend/internal/config"
 	"github.com/andredubov/todo-backend/internal/domain"
 	"github.com/andredubov/todo-backend/internal/service"
 	mock_service "github.com/andredubov/todo-backend/internal/service/mocks"
-	mock_auth "github.com/andredubov/todo-backend/pkg/auth/mocks"
+	"github.com/andredubov/todo-backend/pkg/auth"
 	"github.com/dvln/testify/assert"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -39,16 +40,14 @@ func TestHandler_createList(t *testing.T) {
 		args struct {
 			userId   int
 			todoList domain.TodoList
-			jwtToken string
 		}
 
-		mockBehavior func(s *mock_service.MockTodoList, m *mock_auth.MockTokenManager, args args)
+		mockBehavior func(s *mock_service.MockTodoList, args args)
 
 		test struct {
 			enviroment           enviroment
 			name                 string
-			httpHeaderName       string
-			httpHeaderValue      string
+			jwtTTL               time.Duration
 			inputRequestBody     string
 			input                args
 			mockBehavior         mockBehavior
@@ -87,17 +86,14 @@ func TestHandler_createList(t *testing.T) {
 				jwtSigningKey:        "key",
 			},
 			name:             "OK",
-			httpHeaderName:   authorizationHeader,
-			httpHeaderValue:  bearer + " token",
+			jwtTTL:           time.Duration(5 * time.Minute),
 			inputRequestBody: `{"title": "test title", "description": "test description"}`,
 			input: args{
 				userId:   1,
 				todoList: domain.TodoList{Title: "test title", Description: "test description"},
-				jwtToken: "token",
 			},
-			mockBehavior: func(s *mock_service.MockTodoList, m *mock_auth.MockTokenManager, args args) {
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
 				gomock.InOrder(
-					m.EXPECT().Parse(args.jwtToken).Return(strconv.Itoa(args.userId), nil),
 					s.EXPECT().Validate(args.todoList).Return(nil),
 					s.EXPECT().Create(gomock.Any(), args.todoList, args.userId).Return(1, nil),
 				)
@@ -120,17 +116,14 @@ func TestHandler_createList(t *testing.T) {
 				jwtSigningKey:        "key",
 			},
 			name:             "No Title",
-			httpHeaderName:   authorizationHeader,
-			httpHeaderValue:  bearer + " token",
+			jwtTTL:           time.Duration(5 * time.Minute),
 			inputRequestBody: `{"description": "test description"}`,
 			input: args{
 				userId:   1,
 				todoList: domain.TodoList{Description: "test description"},
-				jwtToken: "token",
 			},
-			mockBehavior: func(s *mock_service.MockTodoList, m *mock_auth.MockTokenManager, args args) {
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
 				gomock.InOrder(
-					m.EXPECT().Parse(args.jwtToken).Return(strconv.Itoa(args.userId), nil),
 					s.EXPECT().Validate(args.todoList).Return(errors.New("the given data was not valid: Title: ")),
 				)
 			},
@@ -152,17 +145,14 @@ func TestHandler_createList(t *testing.T) {
 				jwtSigningKey:        "key",
 			},
 			name:             "No Description",
-			httpHeaderName:   authorizationHeader,
-			httpHeaderValue:  bearer + " token",
+			jwtTTL:           time.Duration(5 * time.Minute),
 			inputRequestBody: `{"title": "test title"}`,
 			input: args{
 				userId:   1,
 				todoList: domain.TodoList{Title: "test title"},
-				jwtToken: "token",
 			},
-			mockBehavior: func(s *mock_service.MockTodoList, m *mock_auth.MockTokenManager, args args) {
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
 				gomock.InOrder(
-					m.EXPECT().Parse(args.jwtToken).Return(strconv.Itoa(args.userId), nil),
 					s.EXPECT().Validate(args.todoList).Return(nil),
 					s.EXPECT().Create(gomock.Any(), args.todoList, args.userId).Return(1, nil),
 				)
@@ -179,8 +169,7 @@ func TestHandler_createList(t *testing.T) {
 			defer controller.Finish()
 
 			mockTodoListService := mock_service.NewMockTodoList(controller)
-			mockTokenManager := mock_auth.NewMockTokenManager(controller)
-			test.mockBehavior(mockTodoListService, mockTokenManager, test.input)
+			test.mockBehavior(mockTodoListService, test.input)
 
 			setEnv(test.enviroment)
 
@@ -190,20 +179,30 @@ func TestHandler_createList(t *testing.T) {
 				return
 			}
 
-			services := service.Service{TodoList: mockTodoListService}
-			h := NewHandler(&services, mockTokenManager, cfg.Auth.JWT)
+			tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+			if err != nil {
+				t.Error(err)
+				return
+			}
 
-			// test server
+			token, err := tokenManager.NewJWT(strconv.Itoa(test.input.userId), test.jwtTTL)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			services := service.Service{TodoList: mockTodoListService}
+			h := NewHandler(&services, tokenManager, cfg.Auth.JWT)
+
 			router := mux.NewRouter()
 			postRouter := router.Methods(http.MethodPost).Subrouter()
 			postRouter.HandleFunc("/api/lists", h.createList)
 			postRouter.Use(h.userIdentity)
 
-			// test
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, "/api/lists", bytes.NewBufferString(test.inputRequestBody))
-			r.Header.Set(test.httpHeaderName, test.httpHeaderValue)
-			router.ServeHTTP(w, r) // perforn request
+			r.Header.Set(authorizationHeader, bearer+" "+token) // set jwt token
+			router.ServeHTTP(w, r)                              // perforn request
 
 			assert.Equal(t, test.expectedStatusCode, w.Code)
 			assert.Equal(t, test.expectedResponseBody, w.Body.String())

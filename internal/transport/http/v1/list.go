@@ -77,7 +77,7 @@ func (h *Handler) getLists(w http.ResponseWriter, r *http.Request) {
 
 	todolists, err := h.services.TodoList.GetByUserId(ctx, userId)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find any todolists by user id"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable find any todo list by user id"))
 		return
 	}
 
