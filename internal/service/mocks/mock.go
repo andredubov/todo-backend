@@ -162,17 +162,17 @@ func (mr *MockTodoListMockRecorder) GetByUserId(ctx, userId interface{}) *gomock
 }
 
 // Update mocks base method.
-func (m *MockTodoList) Update(ctx context.Context, userId, listId int, todolist domain.TodoList) error {
+func (m *MockTodoList) Update(ctx context.Context, userId, listId int, input domain.UpdateTodoListInput) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, userId, listId, todolist)
+	ret := m.ctrl.Call(m, "Update", ctx, userId, listId, input)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockTodoListMockRecorder) Update(ctx, userId, listId, todolist interface{}) *gomock.Call {
+func (mr *MockTodoListMockRecorder) Update(ctx, userId, listId, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTodoList)(nil).Update), ctx, userId, listId, todolist)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTodoList)(nil).Update), ctx, userId, listId, input)
 }
 
 // Validate mocks base method.
@@ -272,17 +272,17 @@ func (mr *MockTodoItemMockRecorder) GetById(ctx, userId, itemId interface{}) *go
 }
 
 // Update mocks base method.
-func (m *MockTodoItem) Update(ctx context.Context, userId, itemId int, item domain.TodoItem) error {
+func (m *MockTodoItem) Update(ctx context.Context, userId, itemId int, input domain.UpdateTodoItemInput) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, userId, itemId, item)
+	ret := m.ctrl.Call(m, "Update", ctx, userId, itemId, input)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockTodoItemMockRecorder) Update(ctx, userId, itemId, item interface{}) *gomock.Call {
+func (mr *MockTodoItemMockRecorder) Update(ctx, userId, itemId, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTodoItem)(nil).Update), ctx, userId, itemId, item)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTodoItem)(nil).Update), ctx, userId, itemId, input)
 }
 
 // Validate mocks base method.

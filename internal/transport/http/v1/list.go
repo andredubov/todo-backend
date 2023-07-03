@@ -48,7 +48,6 @@ func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(domain.TodoList{Id: listId}); err != nil {
