@@ -5,6 +5,7 @@ import (
 
 	"github.com/andredubov/todo-backend/internal/domain"
 	"github.com/andredubov/todo-backend/internal/repository"
+	"gopkg.in/validator.v2"
 )
 
 type todoListService struct {
@@ -18,6 +19,11 @@ func NewTodoListService(repo repository.TodoList) *todoListService {
 }
 
 func (s *todoListService) Validate(todolist domain.TodoList) error {
+
+	if err := validator.Validate(todolist); err != nil {
+		return err
+	}
+
 	return nil
 }
 
