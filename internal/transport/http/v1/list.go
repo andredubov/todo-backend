@@ -35,7 +35,7 @@ func (h *Handler) createList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.services.TodoList.Validate(todoList); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid"))
+		h.writeResponseWithError(w, http.StatusBadRequest, err)
 		return
 	}
 
