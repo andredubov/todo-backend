@@ -350,6 +350,32 @@ func TestHandler_getLists(t *testing.T) {
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"data\":[]}\n",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "Expired Token",
+			jwtTTL: time.Duration(5 * time.Millisecond),
+			delay:  time.Duration(1 * time.Second),
+			input: args{
+				userId: 1,
+			},
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
+
+			},
+			expectedStatusCode:   http.StatusUnauthorized,
+			expectedResponseBody: "{\"message\": \"Token is expired\"}",
+		},
 	}
 
 	for _, test := range tests {
