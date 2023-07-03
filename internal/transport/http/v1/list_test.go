@@ -730,6 +730,37 @@ func TestHandler_updateListByID(t *testing.T) {
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"status\":\"success\"}\n",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "No Description",
+			jwtTTL:           time.Duration(5 * time.Minute),
+			delay:            time.Duration(0 * time.Millisecond),
+			inputRequestBody: `{"title": "new title"}`,
+			input: args{
+				userId:     1,
+				todoListId: 2,
+				updateTodoListInput: domain.UpdateTodoListInput{
+					Title: stringPointer("new title"),
+				},
+			},
+			mockBehavior: func(s *mock_service.MockTodoList, args args) {
+				s.EXPECT().Update(gomock.Any(), args.userId, args.todoListId, args.updateTodoListInput).Return(nil)
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"status\":\"success\"}\n",
+		},
 	}
 
 	for _, test := range tests {
