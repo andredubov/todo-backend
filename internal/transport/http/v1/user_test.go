@@ -380,6 +380,35 @@ func TestHandler_signIn(t *testing.T) {
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: "{\"message\": \"Password: less than min\"}",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Empty",
+			inputRequestBody: "",
+			input: args{
+				userId: 1,
+				jwtCfg: config.JWTConfig{
+					AccessTokenTTL:  5 * time.Minute,
+					RefreshTokenTTL: 5 * time.Minute,
+					SigningKey:      "sign",
+				},
+			},
+			mockBehavior: func(s *mock_service.MockUsers, m *mock_auth.MockTokenManager, input args, output SignInResponse) {
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"EOF\"}",
+		},
 	}
 
 	for _, test := range tests {
