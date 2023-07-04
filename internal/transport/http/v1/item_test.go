@@ -837,6 +837,38 @@ func TestHandler_updateItemByID(t *testing.T) {
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"status\":\"success\"}\n",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "Token Expired",
+			jwtTTL:           time.Duration(5 * time.Millisecond),
+			delay:            time.Duration(1 * time.Second),
+			inputRequestBody: `{"title": "new title", "description": "new description", "done": true}`,
+			input: args{
+				userId:     1,
+				todoItemId: 2,
+				updateTodoItemInput: domain.UpdateTodoItemInput{
+					Title:       stringPointer("new title"),
+					Description: stringPointer("new description"),
+					Done:        boolPointer(true),
+				},
+			},
+			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
+			},
+			expectedStatusCode:   http.StatusUnauthorized,
+			expectedResponseBody: "{\"message\": \"Token is expired\"}",
+		},
 	}
 
 	for _, test := range tests {
