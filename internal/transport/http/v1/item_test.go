@@ -154,7 +154,7 @@ func TestHandler_createItem(t *testing.T) {
 			name:             "No Description",
 			jwtTTL:           time.Duration(5 * time.Minute),
 			delay:            time.Duration(0 * time.Millisecond),
-			inputRequestBody: `{"title": "test title", "Done": false}`,
+			inputRequestBody: `{"title": "test title", "done": false}`,
 			input: args{
 				userId:     1,
 				todoListId: 3,
