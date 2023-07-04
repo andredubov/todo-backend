@@ -11,6 +11,7 @@
 .bin
 #.env
 cover.out
+cover.html
 
 # Test binary, built with `go test -c`
 *.test
