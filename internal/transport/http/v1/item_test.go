@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -104,6 +105,37 @@ func TestHandler_createItem(t *testing.T) {
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"id\":1}\n",
+		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "No Title",
+			jwtTTL:           time.Duration(5 * time.Minute),
+			delay:            time.Duration(0 * time.Millisecond),
+			inputRequestBody: `{"description": "test description"}`,
+			input: args{
+				userId:     1,
+				todoListId: 2,
+				todoItem:   domain.TodoItem{Description: "test description"},
+			},
+			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
+				gomock.InOrder(
+					s.EXPECT().Validate(args.todoItem).Return(errors.New("the given data was not valid: Title: ")),
+				)
+			},
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"message\": \"the given data was not valid: Title: \"}",
 		},
 	}
 
