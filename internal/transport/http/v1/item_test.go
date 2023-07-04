@@ -577,6 +577,32 @@ func TestHandler_getItemByID(t *testing.T) {
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: "{\"message\": \"unable to get a todoItem by id\"}",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "Token Expired",
+			jwtTTL: time.Duration(5 * time.Millisecond),
+			delay:  time.Duration(1 * time.Second),
+			input: args{
+				userId:     1,
+				todoItemId: 3,
+			},
+			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
+			},
+			expectedStatusCode:   http.StatusUnauthorized,
+			expectedResponseBody: "{\"message\": \"Token is expired\"}",
+		},
 	}
 
 	for _, test := range tests {
