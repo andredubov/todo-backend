@@ -281,3 +281,137 @@ func TestHandler_createItem(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_getItems(t *testing.T) {
+
+	type (
+		enviroment struct {
+			appEnv               string
+			httpHost             string
+			httpPort             string
+			postgresHost         string
+			postgresPort         string
+			postgresDatabaseName string
+			postgresUsername     string
+			postgresPassword     string
+			postgressSSLMode     string
+			passwordSalt         string
+			jwtSigningKey        string
+		}
+
+		args struct {
+			userId     int
+			todoListId int
+		}
+
+		mockBehavior func(s *mock_service.MockTodoItem, args args)
+
+		test struct {
+			enviroment           enviroment
+			name                 string
+			jwtTTL               time.Duration
+			delay                time.Duration
+			inputRequestBody     string
+			input                args
+			mockBehavior         mockBehavior
+			expectedStatusCode   int
+			expectedResponseBody string
+		}
+	)
+
+	setEnv := func(env enviroment) {
+		os.Setenv(config.ApplicationEnvironment, env.appEnv)
+		os.Setenv(config.HttpHost, env.httpHost)
+		os.Setenv(config.HttpPort, env.httpPort)
+		os.Setenv(config.PostgresHost, env.postgresHost)
+		os.Setenv(config.PostgresPort, env.postgresPort)
+		os.Setenv(config.PostgresDatabaseName, env.postgresDatabaseName)
+		os.Setenv(config.PostgresUsername, env.postgresUsername)
+		os.Setenv(config.PostgresPassword, env.postgresPassword)
+		os.Setenv(config.PostgresSSLMode, env.postgressSSLMode)
+		os.Setenv(config.PasswordSalt, env.passwordSalt)
+		os.Setenv(config.JwtSigningKey, env.jwtSigningKey)
+	}
+
+	tests := []test{
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "OK",
+			jwtTTL: time.Duration(5 * time.Minute),
+			delay:  time.Duration(0 * time.Millisecond),
+			input: args{
+				userId:     1,
+				todoListId: 1,
+			},
+			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
+				todoItems := []domain.TodoItem{
+					{Id: 1, Title: "title1", Description: "description1", Done: true},
+				}
+				s.EXPECT().GetAll(gomock.Any(), args.userId, args.todoListId).Return(todoItems, nil)
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"data\":[{\"id\":1,\"title\":\"title1\",\"description\":\"description1\",\"done\":true}]}\n",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+
+			mockTodoItemService := mock_service.NewMockTodoItem(controller)
+			test.mockBehavior(mockTodoItemService, test.input)
+
+			setEnv(test.enviroment)
+
+			cfg, err := config.Init(configPath)
+			if err != nil {
+				t.Errorf("config initializing failed: %s", err.Error())
+				return
+			}
+
+			tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			token, err := tokenManager.NewJWT(strconv.Itoa(test.input.userId), test.jwtTTL)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			<-time.After(test.delay)
+
+			services := service.Service{TodoItem: mockTodoItemService}
+			h := NewHandler(&services, tokenManager, cfg.Auth.JWT)
+
+			router := mux.NewRouter()
+			getRouter := router.Methods(http.MethodGet).Subrouter()
+			getRouter.HandleFunc("/api/lists/{id:[0-9]+}/items", h.getItems)
+			getRouter.Use(h.userIdentity)
+
+			w, endpoint := httptest.NewRecorder(), fmt.Sprintf("/api/lists/%d/items", test.input.todoListId)
+			r := httptest.NewRequest(http.MethodGet, endpoint, bytes.NewBufferString(test.inputRequestBody))
+			r.Header.Set(authorizationHeader, bearer+" "+token) // set jwt token
+			router.ServeHTTP(w, r)                              // perforn request
+
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
