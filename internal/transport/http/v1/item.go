@@ -127,7 +127,7 @@ func (h *Handler) getItemByID(w http.ResponseWriter, r *http.Request) {
 
 	todoItem, err := h.services.TodoItem.GetById(ctx, userId, itemId)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find any todo-item by user id"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 
