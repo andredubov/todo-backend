@@ -40,7 +40,7 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.services.TodoItem.Validate(todoItem); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid"))
+		h.writeResponseWithError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -53,11 +53,9 @@ func (h *Handler) createItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todoItem.Id = itemId
-
 	h.writeResponseHeader(w, http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(todoItem); err != nil {
+	if err := json.NewEncoder(w).Encode(domain.TodoItem{Id: itemId}); err != nil {
 		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
 		return
 	}
