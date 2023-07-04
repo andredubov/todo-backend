@@ -40,8 +40,7 @@ ifneq ($(strip $(IS_TODO_DATABASE_EXITED)),)
 endif
 
 cover:
-	go test -v -coverprofile cover.out ./...
-	go tool cover -html cover.out -o cover.html
+	go test -v -coverprofile cover.out ./... && go tool cover -html cover.out -o cover.html
 
 gen-mocks:
 	go generate ./...
