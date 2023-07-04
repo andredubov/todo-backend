@@ -91,11 +91,11 @@ func TestHandler_createItem(t *testing.T) {
 			name:             "OK",
 			jwtTTL:           time.Duration(5 * time.Minute),
 			delay:            time.Duration(0 * time.Millisecond),
-			inputRequestBody: `{"title": "test title", "description": "test description"}`,
+			inputRequestBody: `{"title": "test title", "description": "test description", "Done": false}`,
 			input: args{
 				userId:     1,
 				todoListId: 1,
-				todoItem:   domain.TodoItem{Title: "test title", Description: "test description"},
+				todoItem:   domain.TodoItem{Title: "test title", Description: "test description", Done: false},
 			},
 			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
 				gomock.InOrder(
