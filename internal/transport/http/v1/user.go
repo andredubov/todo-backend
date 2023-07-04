@@ -76,12 +76,12 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	var credentials domain.Credentials
 
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		h.writeResponseWithError(w, http.StatusBadRequest, errors.Wrap(err, "the given data was not valid JSON"))
+		h.writeResponseWithError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := validator.Validate(credentials); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "the signin request data was not valid"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -90,26 +90,26 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.services.Users.GetByCredentials(ctx, credentials)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to find a user by its credentials"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	accessToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.AccessTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create access jwt token"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	refreshToken, err := h.tokenManager.NewJWT(strconv.Itoa(user.Id), h.jwtConfig.RefreshTokenTTL)
 	if err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to create refresh jwt token"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	h.writeResponseHeader(w, http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(SignInResponse{AccessToken: accessToken, ResfreshToken: refreshToken}); err != nil {
-		h.writeResponseWithError(w, http.StatusInternalServerError, errors.Wrap(err, "unable to encode response data"))
+		h.writeResponseWithError(w, http.StatusInternalServerError, err)
 		return
 	}
 }
