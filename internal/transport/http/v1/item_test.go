@@ -921,6 +921,137 @@ func TestHandler_updateItemByID(t *testing.T) {
 	}
 }
 
+func TestHandler_deleteItemByID(t *testing.T) {
+
+	type (
+		enviroment struct {
+			appEnv               string
+			httpHost             string
+			httpPort             string
+			postgresHost         string
+			postgresPort         string
+			postgresDatabaseName string
+			postgresUsername     string
+			postgresPassword     string
+			postgressSSLMode     string
+			passwordSalt         string
+			jwtSigningKey        string
+		}
+
+		args struct {
+			userId     int
+			todoItemId int
+		}
+
+		mockBehavior func(s *mock_service.MockTodoItem, args args)
+
+		test struct {
+			enviroment           enviroment
+			jwtTTL               time.Duration
+			delay                time.Duration
+			name                 string
+			mockBehavior         mockBehavior
+			input                args
+			inputRequestBody     string
+			expectedStatusCode   int
+			expectedResponseBody string
+		}
+	)
+
+	setEnv := func(env enviroment) {
+		os.Setenv(config.ApplicationEnvironment, env.appEnv)
+		os.Setenv(config.HttpHost, env.httpHost)
+		os.Setenv(config.HttpPort, env.httpPort)
+		os.Setenv(config.PostgresHost, env.postgresHost)
+		os.Setenv(config.PostgresPort, env.postgresPort)
+		os.Setenv(config.PostgresDatabaseName, env.postgresDatabaseName)
+		os.Setenv(config.PostgresUsername, env.postgresUsername)
+		os.Setenv(config.PostgresPassword, env.postgresPassword)
+		os.Setenv(config.PostgresSSLMode, env.postgressSSLMode)
+		os.Setenv(config.PasswordSalt, env.passwordSalt)
+		os.Setenv(config.JwtSigningKey, env.jwtSigningKey)
+	}
+
+	tests := []test{
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:   "OK",
+			jwtTTL: time.Duration(5 * time.Minute),
+			delay:  time.Duration(0 * time.Millisecond),
+			input: args{
+				userId:     1,
+				todoItemId: 2,
+			},
+			mockBehavior: func(s *mock_service.MockTodoItem, args args) {
+				s.EXPECT().Delete(gomock.Any(), args.userId, args.todoItemId).Return(nil)
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"status\":\"success\"}\n",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+
+			mockTodoItemService := mock_service.NewMockTodoItem(controller)
+			test.mockBehavior(mockTodoItemService, test.input)
+
+			setEnv(test.enviroment)
+
+			cfg, err := config.Init(configPath)
+			if err != nil {
+				t.Errorf("config initializing failed: %s", err.Error())
+				return
+			}
+
+			tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			token, err := tokenManager.NewJWT(strconv.Itoa(test.input.userId), test.jwtTTL)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			<-time.After(test.delay)
+
+			services := service.Service{TodoItem: mockTodoItemService}
+			h := NewHandler(&services, tokenManager, cfg.Auth.JWT)
+
+			router := mux.NewRouter()
+			deleteRouter := router.Methods(http.MethodPut).Subrouter()
+			deleteRouter.HandleFunc("/api/items/{id:[0-9]+}", h.deleteItemByID)
+			deleteRouter.Use(h.userIdentity)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/items/%d", test.input.todoItemId), bytes.NewBufferString(test.inputRequestBody))
+			r.Header.Set(authorizationHeader, bearer+" "+token) // set jwt token
+			router.ServeHTTP(w, r)                              // perforn request
+
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
 func boolPointer(s bool) *bool {
 	return &s
 }
