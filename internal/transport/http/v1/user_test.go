@@ -320,6 +320,36 @@ func TestHandler_signIn(t *testing.T) {
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "{\"accessToken\":\"accessToken\",\"refreshToken\":\"refreshToken\"}\n",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "No Email",
+			inputRequestBody: `{"password": "qwerty"}`,
+			input: args{
+				userId:      1,
+				credentials: domain.Credentials{Password: "qwerty"},
+				jwtCfg: config.JWTConfig{
+					AccessTokenTTL:  5 * time.Minute,
+					RefreshTokenTTL: 5 * time.Minute,
+					SigningKey:      "sign",
+				},
+			},
+			mockBehavior: func(s *mock_service.MockUsers, m *mock_auth.MockTokenManager, input args, output SignInResponse) {
+			},
+			expectedStatusCode:   http.StatusInternalServerError,
+			expectedResponseBody: "{\"message\": \"Email: zero value\"}",
+		},
 	}
 
 	for _, test := range tests {
