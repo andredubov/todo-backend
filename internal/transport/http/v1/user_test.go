@@ -350,6 +350,36 @@ func TestHandler_signIn(t *testing.T) {
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: "{\"message\": \"Email: zero value\"}",
 		},
+		{
+			enviroment: enviroment{
+				appEnv:               "local",
+				httpHost:             "localhost",
+				httpPort:             "8080",
+				postgresHost:         "localhost",
+				postgresPort:         "5432",
+				postgresDatabaseName: "postgres",
+				postgresUsername:     "postgres",
+				postgresPassword:     "qwerty",
+				postgressSSLMode:     "disable",
+				passwordSalt:         "salt",
+				jwtSigningKey:        "key",
+			},
+			name:             "No Password",
+			inputRequestBody: `{"email": "user@gmail.com"}`,
+			input: args{
+				userId:      1,
+				credentials: domain.Credentials{Email: "user@gmail.com"},
+				jwtCfg: config.JWTConfig{
+					AccessTokenTTL:  5 * time.Minute,
+					RefreshTokenTTL: 5 * time.Minute,
+					SigningKey:      "sign",
+				},
+			},
+			mockBehavior: func(s *mock_service.MockUsers, m *mock_auth.MockTokenManager, input args, output SignInResponse) {
+			},
+			expectedStatusCode:   http.StatusInternalServerError,
+			expectedResponseBody: "{\"message\": \"Password: less than min\"}",
+		},
 	}
 
 	for _, test := range tests {
