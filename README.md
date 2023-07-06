@@ -5,7 +5,7 @@
 
 ## Build & Run (Locally)
 ### Prerequisites
-- go 1.17
+- go 1.20
 - docker & docker-compose
 - [swag](https://github.com/swaggo/swag) (<i>optional</i>, used to re-generate swagger documentation)
 
