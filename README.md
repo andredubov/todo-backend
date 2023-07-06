@@ -1,7 +1,6 @@
 ## REST API to create TODO lists [Backend Application] ![GO][go-badge]
 
-[go-badge]: https://img.shields.io/github/go-mod/go-version/p12s/furniture-store?style=plastic
-[go-url]: https://github.com/andredubov/todo-backend/blob/develop/go.mod
+[go-badge]: https://img.shields.io/github/go-mod/go-version/andredubov/todo-backend
 
 ## Build & Run (Locally)
 ### Prerequisites
