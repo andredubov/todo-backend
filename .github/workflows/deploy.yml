@@ -1,0 +1,28 @@
+name: test
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.17.x, 1.18.x, 1.19.x, 1.20.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: false
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Test
+      run: go test ./...
+  docker:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print tag
+      run: "Tag name from github.ref_name: ${{  github.ref_name }}"
