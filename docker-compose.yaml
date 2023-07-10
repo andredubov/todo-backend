@@ -1,7 +1,5 @@
 version: '3.9'
-
 services:
-
   restapi:
     image: todo_backend
     container_name: todo_backend
@@ -18,7 +16,6 @@ services:
       - .env
     networks:
       - todoNet
-
   postgres:
     image: postgres:15.3-alpine3.18
     container_name: todo_database
@@ -45,7 +42,6 @@ services:
       start_period: 60s
     networks:
       - todoNet
-
 networks:
   todoNet:
     driver: bridge
