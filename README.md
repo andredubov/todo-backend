@@ -26,4 +26,4 @@ PASSWORD_SALT=salt
 JWT_SIGNING_KEY=key
 ```
 
-Use `make run` to build&run project.
+Use `make run` to build and run project.
