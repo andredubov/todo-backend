@@ -7,7 +7,7 @@ WORKDIR /github.com/andredubov/todo-backend
 RUN go mod download && go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./.bin/app ./cmd/app/main.go
 
-FROM alpine:latest
+FROM alpine:3.18.2
 
 RUN apk --no-cache add ca-certificates
 WORKDIR /root
