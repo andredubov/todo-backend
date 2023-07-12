@@ -9,7 +9,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./.bin/app ./cmd/app/main.
 
 FROM alpine:3.18.2
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add "ca-certificates=20230506-r0"
 WORKDIR /root
 
 COPY --from=builder /github.com/andredubov/todo-backend/.bin/app .
